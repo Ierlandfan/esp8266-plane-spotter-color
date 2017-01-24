@@ -18,9 +18,9 @@ Note: only some versions of the NodeMCU provide the USB 5V on the VIN pin
 
 There are some variants of the common 2.2" and 2.4" ILI9341 based displays:
 
-  * Some are fitted with a transistr switch so the LED can be PWM controlled
+  * Some are fitted with a transistor switch so the LED can be PWM controlled
   * Some have no transistor and no current/brightness limit resistor, so use 56 Ohms
-  between the LED pin and 5V (or 5.5V)
+  between the LED pin and 5V (or 3.3V)
 
 If 5V is not available at a pin you can use 3.3V but backlight brightness
 will be lower.
