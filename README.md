@@ -14,7 +14,8 @@ These are the connections assumed for this forked copy of the sketch:
   * Display GND           to NodeMCU pin GND (0V)
   * Display VCC           to NodeMCU pin 5V or 3.3V
   
-Note: only some versions of the NodeMCU provide the USB 5V on the VIN pin
+Note: only some versions of the NodeMCU provide the USB 5V on the VIN pin, To confuse
+matters some NodeMCU clone board pins are mislabeled and D4 and D5 are swapped!
 
 There are some variants of the common 2.2" and 2.4" ILI9341 based displays:
 
