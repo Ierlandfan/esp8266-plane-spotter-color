@@ -1,6 +1,6 @@
 Adapted by Bodmer for use with latest TFT_ILI9341_ESP and JPEGDecoder library from my repository.
 
-Original test follows but these are the connections assumed for this forked copy of the sketch:
+These are the connections assumed for this forked copy of the sketch:
 
   The typical setup for a NodeMCU1.0 (ESP-12 Module) is :
   
@@ -14,14 +14,16 @@ Original test follows but these are the connections assumed for this forked copy
   * Display GND           to NodeMCU pin GND (0V)
   * Display VCC           to NodeMCU pin 5V or 3.3V
   
-  Note: only some versions of the NodeMCU provide the USB 5V on the VIN pin
+Note: only some versions of the NodeMCU provide the USB 5V on the VIN pin
   
-  If 5V is not available at a pin you can use 3.3V but backlight brightness
-  will be lower.
+If 5V is not available at a pin you can use 3.3V but backlight brightness
+will be lower.
   
-  If the TFT RESET signal is connected to the NodeMCU RST line then define the pin
-  in the TFT library User_Config.h file as negative so the library ignores it,
-  e.g. TFT_RST -1
+If the TFT RESET signal is connected to the NodeMCU RST line then define the pin
+in the TFT library User_Config.h file as negative so the library ignores it,
+e.g. TFT_RST -1
+
+##Original master repository text follows:
 
 
 #ESP8266 Plane Spotter Color
