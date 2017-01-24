@@ -5,7 +5,7 @@ These are the connections assumed for this forked copy of the sketch:
   The typical setup for a NodeMCU1.0 (ESP-12 Module) is :
   
   * Display SDO/MISO      to NodeMCU pin D6 <<<<<< This is not used by this sketch
-  * Display LED           to NodeMCU pin  5V or 3.3V
+  * Display LED           to NodeMCU pin  5V or 3.3V via a 56 Ohm resistor
   * Display SCK           to NodeMCU pin D5
   * Display SDI/MOSI      to NodeMCU pin D7
   * Display DC/RS (or AO) to NodeMCU pin D3
@@ -15,7 +15,13 @@ These are the connections assumed for this forked copy of the sketch:
   * Display VCC           to NodeMCU pin 5V or 3.3V
   
 Note: only some versions of the NodeMCU provide the USB 5V on the VIN pin
-  
+
+There are some variants of the common 2.2" and 2.4" ILI9341 based displays:
+
+  * Some are fitted with a transistr switch so the LED can be PWM controlled
+  * Some have no transistor and no current/brightness limit resistor, so use 56 Ohms
+  between the LED pin and 5V (or 5.5V)
+
 If 5V is not available at a pin you can use 3.3V but backlight brightness
 will be lower.
   
