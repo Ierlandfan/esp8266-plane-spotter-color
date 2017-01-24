@@ -24,16 +24,19 @@ See more at https://blog.squix.org
 
 
 */
+// Go to settings to change important parameters
+#include "settings.h"
 
 #include "PlaneSpotter.h"
+#include <SPI.h>
 
-PlaneSpotter::PlaneSpotter(Adafruit_ILI9341* tft, GeoMap* geoMap) {
+PlaneSpotter::PlaneSpotter(TFT_ILI9341_ESP* tft, GeoMap* geoMap) {
   tft_ = tft;
   geoMap_ = geoMap;
 }
 
 void PlaneSpotter::copyProgmemToSpiffs(const uint8_t *data, unsigned int length, String filename) {
-  File f = SPIFFS.open(filename, "w+");
+  fs::File f = SPIFFS.open(filename, "w+");
   uint8_t c;
   for(int i = 0; i < length; i++) {
     c = pgm_read_byte(data + i);
@@ -44,43 +47,52 @@ void PlaneSpotter::copyProgmemToSpiffs(const uint8_t *data, unsigned int length,
 
 
 void PlaneSpotter::drawSPIFFSJpeg(String filename, int xpos, int ypos) {
-  
   Serial.println(filename);
-  char buffer[filename.length() + 1];
-  filename.toCharArray(buffer, filename.length() + 1);
-  JpegDec.decodeFile(buffer);
+  JpegDec.decodeFile(filename);
+  jpegInfo();
   renderJPEG(xpos, ypos);
-  
 }
 
 void PlaneSpotter::renderJPEG(int xpos, int ypos) {
 
-  uint16_t  *pImg;
+  uint8_t  *pImg;
   uint16_t mcu_w = JpegDec.MCUWidth;
   uint16_t mcu_h = JpegDec.MCUHeight;
-  uint32_t mcu_pixels = mcu_w * mcu_h;
+  uint32_t max_x = JpegDec.width;
+  uint32_t max_y = JpegDec.height;
+
+  uint32_t min_w = min(mcu_w, max_x % mcu_w);
+  uint32_t min_h = min(mcu_h, max_y % mcu_h);
+
+  uint32_t win_w = mcu_w;
+  uint32_t win_h = mcu_h;
+
   uint32_t drawTime = millis();
 
-  while( JpegDec.read()){
+  max_x += xpos;
+  max_y += ypos;
+
+  while( JpegDec.readSwappedBytes()){
     
-    pImg = JpegDec.pImage;
+    pImg = (uint8_t*)JpegDec.pImage;
     int mcu_x = JpegDec.MCUx * mcu_w + xpos;
     int mcu_y = JpegDec.MCUy * mcu_h + ypos;
-    if ( ( mcu_x + mcu_w) <= tft_->width() && ( mcu_y + mcu_h) <= tft_->height()){
-      
-      tft_->setWindow(mcu_x, mcu_y, mcu_x + mcu_w - 1, mcu_y + mcu_h - 1);
-      uint32_t count = mcu_pixels;
-      while (count--) {tft_->pushColor(*pImg++);}
-      // Push all MCU pixels to the TFT window, ~18% faster to pass an array pointer and length to the library
-      //tft_->pushColor16(pImg, mcu_pixels); //  To be supported in HX8357 library at a future date
 
+    if (mcu_x + mcu_w <= max_x) win_w = mcu_w;
+    else win_w = min_w;
+    if (mcu_y + mcu_h <= max_y) win_h = mcu_h;
+    else win_h = min_h;
+
+    uint32_t mcu_pixels = win_w * win_h * 2;
+
+    if ( ( mcu_x + win_w) <= tft_->width() && ( mcu_y + win_h) <= tft_->height()){
+      tft_->setWindow(mcu_x, mcu_y, mcu_x + win_w - 1, mcu_y + win_h - 1);
+      tft_->pushColors(pImg, mcu_pixels);    // pushColors via 64 byte SPI port buffer
     }
 
     else if( ( mcu_y + mcu_h) >= tft_->height()) JpegDec.abort();
   
   }
-
-
 }
 
 void PlaneSpotter::drawAircraftHistory(Aircraft aircraft, AircraftHistory history) {
@@ -108,10 +120,10 @@ void PlaneSpotter::drawPlane(Aircraft aircraft, boolean isSpecial) {
   coordinates.lon = aircraft.lon;
   coordinates.lat = aircraft.lat;  
   CoordinatesPixel p = geoMap_->convertToPixel(coordinates);
-  
-  setTextColor(TFT_WHITE, TFT_BLACK);
-  setTextAlignment(LEFT);
-  drawString(p.x + 8,p.y - 5, aircraft.call);
+  tft_->setTextPadding(0);
+  tft_->setTextColor(TFT_BLACK, TFT_LIGHTGREY);
+  tft_->setTextDatum(BC_DATUM);
+  tft_->drawString(aircraft.call, p.x + 8,p.y - 5, 1 );
   
   int planeDotsX[planeDots_];
   int planeDotsY[planeDots_];
@@ -131,81 +143,79 @@ void PlaneSpotter::drawPlane(Aircraft aircraft, boolean isSpecial) {
 }
 
 void PlaneSpotter::drawInfoBox(Aircraft closestAircraft) {
-  int line1 = geoMap_->getMapHeight() + 18;
-  int line2 = geoMap_->getMapHeight() + 27;
+  int line1 = geoMap_->getMapHeight() + 16;
+  int line2 = geoMap_->getMapHeight() + 26;
   int line3 = geoMap_->getMapHeight() + 36;
-  int right = tft_->getWidth() - 3;
-  tft_->fillRect(0, geoMap_->getMapHeight(), tft_->width(), tft_->height() - geoMap_->getMapHeight(), TFT_BLACK);
+  int right = tft_->width() - 3;
+  //tft_->fillRect(0, geoMap_->getMapHeight(), tft_->width(), tft_->height() - geoMap_->getMapHeight(), TFT_BLACK);
   if (closestAircraft.call != "") {
-    setTextAlignment(LEFT);
-    setTextColor(TFT_WHITE);
-    drawString(0, line1, closestAircraft.call);
+
+    int xwidth = tft_->textWidth("ABC1234XY", GFXFONT ) + 12;
+    tft_->setTextPadding(xwidth);
+    tft_->setTextDatum(BL_DATUM);
+    tft_->setTextColor(TFT_WHITE, TFT_BLACK);
+    tft_->drawString(closestAircraft.call, 0, line1, GFXFONT );
+
+    tft_->setTextPadding(320 - xwidth);
+    tft_->setTextDatum(BR_DATUM);
+    tft_->drawString(closestAircraft.aircraftType, right, line1, GFXFONT );
     
-    setTextAlignment(RIGHT);
-    drawString(right, line1, closestAircraft.aircraftType);
+    tft_->setTextColor(TFT_YELLOW, TFT_BLACK);
+    tft_->setTextDatum(BL_DATUM);
+    xwidth = tft_->textWidth("Alt: XXXXXft", GFXFONT ) + 12;
+    tft_->setTextPadding(xwidth);
+    tft_->drawString("Alt: " + String(closestAircraft.altitude) + "ft", 0, line2, GFXFONT );
     
-    setTextColor(TFT_YELLOW);
-    setTextAlignment(LEFT);
-    drawString(0, line2, "Alt: " + String(closestAircraft.altitude) + "ft");
-    
+    int xpos = xwidth;
+    tft_->setTextDatum(BL_DATUM);
+    xwidth = tft_->textWidth("Spd : XXXXkn", GFXFONT ) + 10;
+    tft_->setTextPadding(xwidth);
+    tft_->drawString("Spd: " + String(closestAircraft.speed, 0) + "kn", xpos, line2, GFXFONT );
+
+    xpos += xwidth;
+    tft_->setTextDatum(BL_DATUM);
+    xwidth = tft_->textWidth("Spd : XXXXkn", GFXFONT ) + 10;
+    tft_->setTextPadding(xwidth);
+    tft_->drawString("Dst: " + String(closestAircraft.distance, 2) + "km", xpos, line2, GFXFONT );
+
+    tft_->setTextDatum(BL_DATUM);
+    xwidth = tft_->textWidth("Hdg: 000", GFXFONT );
+    tft_->setTextPadding(xwidth);
+    tft_->drawString("Hdg: " + String(closestAircraft.heading, 0), right - xwidth, line2, GFXFONT );
   
-    setTextAlignment(CENTER);
-    drawString(tft_->getWidth() / 2, line2, "Spd: " + String(closestAircraft.speed, 0) + "kn");
-    
-    setTextAlignment(RIGHT);
-    drawString(right, line2, " Heading: " + String(closestAircraft.heading, 0));
-  
-    setTextColor(TFT_GREEN);
-    setTextAlignment(LEFT);
-    drawString(0, line3, "Dst: " + String(closestAircraft.distance, 2) + "km");
-  
+
     if (closestAircraft.fromShort != "" && closestAircraft.toShort != "") {
-      setTextAlignment(RIGHT);
-      drawString(right, line3, "From: " + closestAircraft.fromShort + "=>" + closestAircraft.toShort);
+    tft_->setTextColor(TFT_GREEN, TFT_BLACK);
+    tft_->setTextDatum(BL_DATUM);
+    //tft_->setTextWrap(1);
+    tft_->setTextPadding(320);
+    tft_->drawString("From: " + closestAircraft.fromShort + "=>" + closestAircraft.toShort, 0, line3, GFXFONT );
     }
   }
- 
 }
 
-void PlaneSpotter::drawString(int x, int y, char *text) {
-  int16_t x1, y1;
-  uint16_t w, h;
-  tft_->setTextWrap(false);
-  tft_->getTextBounds(text, 0, 0, &x1, &y1, &w, &h);
-  switch (alignment_) {
-    case LEFT:
-      x1 = x;
-      break;
-    case CENTER:
-      x1 = x - w / 2;
-      break;
-    case RIGHT:
-      x1 = x - w;
-      break;
-  }
-  if (textColor_ != backgroundColor_) {
-    tft_->fillRect(x1, y - h -1, w + 2, h + 3, backgroundColor_);
-  }
-  tft_->setCursor(x1, y);
-  tft_->print(text);
-}
+void PlaneSpotter::jpegInfo() {
 
-void PlaneSpotter::drawString(int x, int y, String text) {
-  char buf[text.length()+2];
-  text.toCharArray(buf, text.length() + 1);
-  drawString(x, y, buf);
-}
-
-void PlaneSpotter::setTextColor(uint16_t c) {
-  setTextColor(c, c);
-}
-void PlaneSpotter::setTextColor(uint16_t c, uint16_t bg) {
-  textColor_ = c;
-  backgroundColor_ = bg;
-  tft_->setTextColor(textColor_, backgroundColor_);
-}
-
-void PlaneSpotter::setTextAlignment(TextAlignment alignment) {
-  alignment_ = alignment;
+  // Print information extracted from the JPEG file
+  Serial.println("JPEG image info");
+  Serial.println("===============");
+  Serial.print("Width      :");
+  Serial.println(JpegDec.width);
+  Serial.print("Height     :");
+  Serial.println(JpegDec.height);
+  Serial.print("Components :");
+  Serial.println(JpegDec.comps);
+  Serial.print("MCU / row  :");
+  Serial.println(JpegDec.MCUSPerRow);
+  Serial.print("MCU / col  :");
+  Serial.println(JpegDec.MCUSPerCol);
+  Serial.print("Scan type  :");
+  Serial.println(JpegDec.scanType);
+  Serial.print("MCU width  :");
+  Serial.println(JpegDec.MCUWidth);
+  Serial.print("MCU height :");
+  Serial.println(JpegDec.MCUHeight);
+  Serial.println("===============");
+  Serial.println("");
 }
 

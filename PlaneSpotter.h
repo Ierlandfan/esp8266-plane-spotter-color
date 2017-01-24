@@ -25,13 +25,22 @@ See more at https://blog.squix.org
 
 */
 
+#define minimum(a,b)     (((a) < (b)) ? (a) : (b))
+
 #pragma once
 
+// Call up the SPIFFS FLASH filing system this is part of the ESP Core
+#define FS_NO_GLOBALS
 #include <FS.h>
+
 // JPEG decoder library
 #include <JPEGDecoder.h>
+
+// Call up the TFT library
+#include <TFT_ILI9341_ESP.h> // Hardware-specific library
+
 #include "AdsbExchangeClient.h"
-#include "ILI9341.h"
+///#include "ILI9341.h"
 #include "GeoMap.h"
 
 #define TFT_BLACK   0x0000
@@ -49,7 +58,7 @@ enum TextAlignment {
 
 class PlaneSpotter {
   public:
-    PlaneSpotter(Adafruit_ILI9341* tft, GeoMap* geoMap);
+    PlaneSpotter(TFT_ILI9341_ESP* tft, GeoMap* geoMap);
     void copyProgmemToSpiffs(const uint8_t *data, unsigned int length, String filename);
 
     void drawSPIFFSJpeg(String filename, int xpos, int ypos);
@@ -61,18 +70,10 @@ class PlaneSpotter {
 
     void drawAircraftHistory(Aircraft aircraft, AircraftHistory history);
 
-    void drawString(int x, int y, char *text);
-    
-    void drawString(int x, int y, String text);
-    
-    void setTextAlignment(TextAlignment alignment);
-    
-    void setTextColor(uint16_t c);
-    
-    void setTextColor(uint16_t c, uint16_t bg);
+    void jpegInfo(void);
 
   private:
-    Adafruit_ILI9341* tft_;
+    TFT_ILI9341_ESP* tft_;
     GeoMap* geoMap_;
     // Shape of the plane
     // The points are defined as degree on a circle, the first array are the degrees, 

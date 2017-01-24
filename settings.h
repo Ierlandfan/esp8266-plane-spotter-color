@@ -25,22 +25,17 @@ See more at https://blog.squix.org
 
 */
 
-// Tft library connectors
-#define TFT_DC D2
-#define TFT_CS D1
-#define TOUCH_CS D3
-#define TOUCH_IRQ  D4
-#define LED_PIN D8
-
 // Needed for loading the map. If you want to be save better get your own key here:
 // https://developer.mapquest.com/plan_purchase/steps/business_edition/business_edition_free/register
-#define MAP_QUEST_API_KEY "r19I8UVBfwIkmE4EZR9S6yMR43eMiRDZ"
+#define MAP_QUEST_API_KEY "7IbGOnKaynIWUj9Qhd5lGWxAV7UQc9Uz"
 
 // Need for loading map by google static map api. If you want to be save better create one here
 // https://developers.google.com/maps/documentation/static-maps/get-api-key?hl=de
-#define GOOGLE_API_KEY "AIzaSyBw0G8jCBry0IATNmysuyPd2fBblndS3jU"
+#define GOOGLE_API_KEY "AIzaSyCOERMOCjVexESL7bV8ik4fhNSQZBD8Dlk"
 
-#define MAP_ZOOM 11
+#define GFXFONT 1
+
+#define MAP_ZOOM 10 //11
 #define MAP_WIDTH 320
 #define MAP_HEIGHT 192
 

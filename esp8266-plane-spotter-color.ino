@@ -24,10 +24,18 @@ See more at http://blog.squix.ch
 */
 
 #include <Arduino.h>
-#include <Adafruit_GFX.h>
 
 //SPIFFS stuff
+// Call up the SPIFFS FLASH filing system this is part of the ESP Core
+// Define no globals so the File type does not clach with the SD library
+// we must then use the SPIFFS namespace fs::File
+// ##################################################################################
+// IMPORTANT
+// Use ESP8266 board Core version 2.3.0 to avoid a clash on the "File" definition!
+// ##################################################################################
+#define FS_NO_GLOBALS
 #include <FS.h>
+
 #include <SPI.h>
 
 // Wifi Libraries
@@ -45,14 +53,15 @@ See more at http://blog.squix.ch
 
 // Project libraries
 #include "WifiLocator.h"
-#include "PlaneSpotter.h"
-#include "ILI9341.h"
+#include "PlaneSpotter.h" // Pulls in the TFT library
+
 #include "artwork.h"
 #include "AdsbExchangeClient.h"
 #include "GeoMap.h"
 
 // Initialize the TFT
-Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
+TFT_ILI9341_ESP tft = TFT_ILI9341_ESP();
+
 WifiLocator locator;
 AdsbExchangeClient adsbClient;
 GeoMap geoMap(MapProvider::Google, GOOGLE_API_KEY, MAP_WIDTH, MAP_HEIGHT);
@@ -83,29 +92,30 @@ void setup() {
   Serial.println("Free Heap: " + String(ESP.getFreeHeap()));
   // The LED pin needs to set HIGH
   // Use this pin to save energy
-  pinMode(LED_PIN, D8);
-  digitalWrite(LED_PIN, HIGH);
+//  pinMode(LED_PIN, D8);
+//  digitalWrite(LED_PIN, HIGH);
 
   // Init TFT
   tft.begin();
   tft.setRotation(3);  // landscape
-  tft.cp437(false);
-  tft.setFont(&Dialog_plain_9);
+  //tft.cp437(false);
+  tft.setFreeFont(&Dialog_plain_9);
   tft.fillScreen(TFT_BLACK);
-  planeSpotter.setTextColor(TFT_WHITE, TFT_BLACK);
-  planeSpotter.setTextAlignment(CENTER);
-  planeSpotter.drawString(160, 200, "     Loading Splash...     ");
+  tft.setTextColor(TFT_WHITE, TFT_BLACK);
+  tft.setTextDatum(BC_DATUM);
+  tft.setTextPadding(320);
+  tft.drawString( "Loading Splash...", 160, 220, 1 );
 
   // Init file system
   if (!SPIFFS.begin()) { Serial.println("initialisation failed!"); return;}
 
-  // copy files from code to SPIFFS
-  planeSpotter.copyProgmemToSpiffs(splash, splash_len, "/plane.jpg");
-  planeSpotter.copyProgmemToSpiffs(plane, plane_len, "/plane.jpg");
-  planeSpotter.drawSPIFFSJpeg("/splash.jpg", 30, 75);
-  planeSpotter.setTextColor(TFT_WHITE, TFT_BLACK);
-  planeSpotter.setTextAlignment(CENTER);
-  planeSpotter.drawString(160, 200, "     Connecting to WiFi..     ");
+  JpegDec.decodeArray(splash, splash_len);
+  planeSpotter.jpegInfo();
+  planeSpotter.renderJPEG(30 , 75);
+
+  //tft.drawRect(30,75,260,92, TFT_GREEN); // Jpeg bounding box for tests
+
+  tft.drawString("Connecting to WiFi...", 160, 220, 1 );
   
   
   WiFiManager wifiManager;
@@ -123,14 +133,15 @@ void setup() {
   mapCenter.lat = locator.getLat().toFloat();
   mapCenter.lon = locator.getLon().toFloat();
 
-  planeSpotter.setTextColor(TFT_WHITE, TFT_BLACK);
-  planeSpotter.setTextAlignment(CENTER);
-  planeSpotter.drawString(160, 200, "          Loading map...          ");
+  tft.drawString("Loading map...", 160, 220, 1 );
+
+  delay(500);
+  
   geoMap.downloadMap(mapCenter, MAP_ZOOM, _downloadCallback);
 
   northWestBound = geoMap.convertToCoordinates({0,0});
   southEastBound = geoMap.convertToCoordinates({MAP_WIDTH, MAP_HEIGHT});
-  
+  tft.fillRect(0, geoMap.getMapHeight(), tft.width(), tft.height() - geoMap.getMapHeight(), TFT_BLACK);
 }
 
 
@@ -141,16 +152,15 @@ void loop() {
   long startMillis = millis();
   planeSpotter.drawSPIFFSJpeg(geoMap.getMapName(), 0, 0);
 
-  tft.setTextColor(TFT_WHITE, TFT_BLACK);
+uint32_t pplot = millis();
   Aircraft closestAircraft = adsbClient.getClosestAircraft(mapCenter.lat, mapCenter.lon);
   for (int i = 0; i < adsbClient.getNumberOfAircrafts(); i++) {
     Aircraft aircraft = adsbClient.getAircraft(i);
     AircraftHistory history = adsbClient.getAircraftHistory(i);
     planeSpotter.drawAircraftHistory(aircraft, history);
     planeSpotter.drawPlane(aircraft, aircraft.call == closestAircraft.call);
-
-
   }
+  Serial.print("Time to plot planes is: "); Serial.println(millis() - pplot);
   planeSpotter.drawInfoBox(closestAircraft);
 
   // Draw center of map
@@ -163,13 +173,13 @@ void loop() {
 }
 
 
-
 void downloadCallback(String filename, uint32_t bytesDownloaded, uint32_t bytesTotal) {
   Serial.println(String(bytesDownloaded) + " / " + String(bytesTotal));
   int width = 320;
   int progress = width * bytesDownloaded / bytesTotal;
   tft.fillRect(10, 220, progress, 5, TFT_WHITE);
-  planeSpotter.drawSPIFFSJpeg("/plane.jpg", 15 + progress, 220 - 15);
+  JpegDec.decodeArray(plane, plane_len);
+  planeSpotter.renderJPEG(15 + progress, 220 - 15);
 }
 
 

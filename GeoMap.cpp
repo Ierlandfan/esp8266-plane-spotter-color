@@ -59,7 +59,7 @@ void GeoMap::downloadMap(Coordinates mapCenter, int zoom, ProgressCallback progr
 }
 
 String GeoMap::getMapName() {
-  return "map" + String(mapCenter_.lat) + "_" + String(mapCenter_.lon) + "_" + String(zoom_) + ".jpg";
+  return "/map" + String(mapCenter_.lat) + "_" + String(mapCenter_.lon) + "_" + String(zoom_) + ".jpg";
 }
 
 CoordinatesPixel GeoMap::convertToPixel(Coordinates coordinates) {
@@ -134,7 +134,7 @@ void GeoMap::downloadFile(String url, String filename, ProgressCallback progress
         int httpCode = http.GET();
         if(httpCode > 0) {
             //SPIFFS.remove(filename);
-            File f = SPIFFS.open(filename, "w+");
+            fs::File f = SPIFFS.open(filename, "w+");
             if (!f) {
                 Serial.println("file open failed");
                 return;
