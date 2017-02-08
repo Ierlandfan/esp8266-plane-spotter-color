@@ -66,7 +66,7 @@ class PlaneSpotter {
 
     void drawPlane(Aircraft aircraft, boolean isSpecial);
 
-    void drawInfoBox(Aircraft closestAircraft);
+    String drawInfoBox(Aircraft closestAircraft);
 
     void drawAircraftHistory(Aircraft aircraft, AircraftHistory history);
 

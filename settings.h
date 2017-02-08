@@ -37,6 +37,6 @@ See more at https://blog.squix.org
 
 #define MAP_ZOOM 10 //11
 #define MAP_WIDTH 320
-#define MAP_HEIGHT 192
+#define MAP_HEIGHT 200
 
 

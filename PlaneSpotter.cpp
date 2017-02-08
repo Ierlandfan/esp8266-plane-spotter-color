@@ -46,20 +46,20 @@ void PlaneSpotter::copyProgmemToSpiffs(const uint8_t *data, unsigned int length,
 }
 
 
-void PlaneSpotter::drawSPIFFSJpeg(String filename, int xpos, int ypos) {
+void PlaneSpotter::drawSPIFFSJpeg(String filename, int32_t xpos, int32_t ypos) {
   Serial.println(filename);
   JpegDec.decodeFile(filename);
-  jpegInfo();
+  //jpegInfo();
   renderJPEG(xpos, ypos);
 }
 
-void PlaneSpotter::renderJPEG(int xpos, int ypos) {
+void PlaneSpotter::renderJPEG(int32_t xpos, int32_t ypos) {
 
   uint8_t  *pImg;
-  uint16_t mcu_w = JpegDec.MCUWidth;
-  uint16_t mcu_h = JpegDec.MCUHeight;
-  uint32_t max_x = JpegDec.width;
-  uint32_t max_y = JpegDec.height;
+  uint32_t mcu_w = JpegDec.MCUWidth;
+  uint32_t mcu_h = JpegDec.MCUHeight;
+  int32_t max_x = JpegDec.width;
+  int32_t max_y = JpegDec.height;
 
   uint32_t min_w = min(mcu_w, max_x % mcu_w);
   uint32_t min_h = min(mcu_h, max_y % mcu_h);
@@ -75,8 +75,8 @@ void PlaneSpotter::renderJPEG(int xpos, int ypos) {
   while( JpegDec.readSwappedBytes()){
     
     pImg = (uint8_t*)JpegDec.pImage;
-    int mcu_x = JpegDec.MCUx * mcu_w + xpos;
-    int mcu_y = JpegDec.MCUy * mcu_h + ypos;
+    int32_t mcu_x = JpegDec.MCUx * mcu_w + xpos;
+    int32_t mcu_y = JpegDec.MCUy * mcu_h + ypos;
 
     if (mcu_x + mcu_w <= max_x) win_w = mcu_w;
     else win_w = min_w;
@@ -142,11 +142,11 @@ void PlaneSpotter::drawPlane(Aircraft aircraft, boolean isSpecial) {
   }
 }
 
-void PlaneSpotter::drawInfoBox(Aircraft closestAircraft) {
-  int line1 = geoMap_->getMapHeight() + 16;
-  int line2 = geoMap_->getMapHeight() + 26;
-  int line3 = geoMap_->getMapHeight() + 36;
-  int right = tft_->width() - 3;
+String PlaneSpotter::drawInfoBox(Aircraft closestAircraft) {
+  int line1 = geoMap_->getMapHeight() + 10;
+  int line2 = geoMap_->getMapHeight() + 20;
+  int line3 = geoMap_->getMapHeight() + 30;
+  int right = tft_->width();
   //tft_->fillRect(0, geoMap_->getMapHeight(), tft_->width(), tft_->height() - geoMap_->getMapHeight(), TFT_BLACK);
   if (closestAircraft.call != "") {
 
@@ -158,7 +158,7 @@ void PlaneSpotter::drawInfoBox(Aircraft closestAircraft) {
 
     tft_->setTextPadding(320 - xwidth);
     tft_->setTextDatum(BR_DATUM);
-    tft_->drawString(closestAircraft.aircraftType, right, line1, GFXFONT );
+    tft_->drawString(closestAircraft.aircraftType, right - 2, line1, GFXFONT );
     
     tft_->setTextColor(TFT_YELLOW, TFT_BLACK);
     tft_->setTextDatum(BL_DATUM);
@@ -183,15 +183,11 @@ void PlaneSpotter::drawInfoBox(Aircraft closestAircraft) {
     tft_->setTextPadding(xwidth);
     tft_->drawString("Hdg: " + String(closestAircraft.heading, 0), right - xwidth, line2, GFXFONT );
   
-
     if (closestAircraft.fromShort != "" && closestAircraft.toShort != "") {
-    tft_->setTextColor(TFT_GREEN, TFT_BLACK);
-    tft_->setTextDatum(BL_DATUM);
-    //tft_->setTextWrap(1);
-    tft_->setTextPadding(320);
-    tft_->drawString("From: " + closestAircraft.fromShort + "=>" + closestAircraft.toShort, 0, line3, GFXFONT );
+    return "From: " + closestAircraft.fromShort + "=>" + closestAircraft.toShort;
     }
   }
+  return "";
 }
 
 void PlaneSpotter::jpegInfo() {

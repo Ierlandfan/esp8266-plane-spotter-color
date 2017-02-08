@@ -21,6 +21,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 See more at http://blog.squix.ch
+
+Adapter by Bodmer to use latest JPEGDecoder library.
 */
 
 #include <Arduino.h>
@@ -146,28 +148,42 @@ void setup() {
 
 
 void loop() {
-  Serial.println("Heap: " + String(ESP.getFreeHeap()));
+  //Serial.println("Heap: " + String(ESP.getFreeHeap()));
   adsbClient.updateVisibleAircraft(QUERY_STRING + "&lat=" + String(mapCenter.lat, 6) + "&lng=" + String(mapCenter.lon, 6) + "&fNBnd=" + String(northWestBound.lat, 9) + "&fWBnd=" + String(northWestBound.lon, 9) + "&fSBnd=" + String(southEastBound.lat, 9) + "&fEBnd=" + String(southEastBound.lon, 9));
-  
+
+  Aircraft closestAircraft = adsbClient.getClosestAircraft(mapCenter.lat, mapCenter.lon);
+
   long startMillis = millis();
   planeSpotter.drawSPIFFSJpeg(geoMap.getMapName(), 0, 0);
-
-uint32_t pplot = millis();
-  Aircraft closestAircraft = adsbClient.getClosestAircraft(mapCenter.lat, mapCenter.lon);
+  Serial.println(String(millis()-startMillis) + "ms for Jpeg drawing");
+  //uint32_t pplot = millis();
   for (int i = 0; i < adsbClient.getNumberOfAircrafts(); i++) {
     Aircraft aircraft = adsbClient.getAircraft(i);
     AircraftHistory history = adsbClient.getAircraftHistory(i);
     planeSpotter.drawAircraftHistory(aircraft, history);
     planeSpotter.drawPlane(aircraft, aircraft.call == closestAircraft.call);
   }
-  Serial.print("Time to plot planes is: "); Serial.println(millis() - pplot);
-  planeSpotter.drawInfoBox(closestAircraft);
-
+  //Serial.print("Time to plot planes is: "); Serial.println(millis() - pplot);
+  
+  if (adsbClient.getNumberOfAircrafts()) {
+    String fromString = planeSpotter.drawInfoBox(closestAircraft);
+    // Use print stream so the line wraps (tft_->print does not work, kludge is to get the String returned so we can use the print class!)
+    tft.setCursor(0, 228);
+    tft.setTextColor(TFT_GREEN, TFT_BLACK);
+    tft.setTextDatum(BL_DATUM);
+    tft.setTextWrap(1);
+    // Using tft.print() means background is not plotted so we must blank out the old text
+    // the advantage though is that it auto-wraps to the next line.
+    tft.fillRect(0, 220, tft.width(), tft.height() - 220, TFT_BLACK);
+    tft.print(fromString);
+  }
+  else tft.fillRect(0, geoMap.getMapHeight(), tft.width(), tft.height() - geoMap.getMapHeight(), TFT_BLACK);
+  
   // Draw center of map
   CoordinatesPixel p = geoMap.convertToPixel(mapCenter);
   tft.fillCircle(p.x, p.y, 2, TFT_BLUE); 
 
-  Serial.println(String(millis()-startMillis) + "ms for drawing");
+  Serial.println(String(millis()-startMillis) + "ms for all drawing");
   delay(2000);
 
 }

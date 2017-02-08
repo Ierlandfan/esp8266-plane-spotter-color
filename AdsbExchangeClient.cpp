@@ -46,8 +46,8 @@ void AdsbExchangeClient::updateVisibleAircraft(String searchQuery) {
   }
 
 
-  Serial.print("Requesting URL: ");
-  Serial.println(url);
+  //Serial.print("Requesting URL: ");
+  //Serial.println(url);
 
   // This will send the request to the server
   client.print(String("GET ") + url + " HTTP/1.1\r\n" +
@@ -224,7 +224,7 @@ Aircraft AdsbExchangeClient::getClosestAircraft(double lat, double lon) {
 
 void AdsbExchangeClient::endArray() {
   if (counter >= MAX_AIRCRAFTS - 1) {
-    Serial.println("MAx Aircrafts reached:end array");
+    Serial.println("Max Aircrafts reached:end array");
     return;
   }
   if (currentKey == "Cos" && trailIndex > 0) {
@@ -240,7 +240,7 @@ void AdsbExchangeClient::endArray() {
       position.coordinates = coordinates;
       position.altitude = positionTemp[items - i - 1].altitude;
       history.positions[i] = position;
-      Serial.println(String(i) + ": " + String(items - i -1) + ", " + String(history.positions[i].coordinates.lat, 9) + ", " + String(history.positions[i].coordinates.lon, 9));
+      //Serial.println(String(i) + ": " + String(items - i -1) + ", " + String(history.positions[i].coordinates.lat, 9) + ", " + String(history.positions[i].coordinates.lon, 9));
       historyCounter++;
     }
     history.call = aircrafts[index].call;

@@ -1879,4 +1879,4 @@ const GFXglyph Dialog_plain_9Glyphs[] PROGMEM = {
     {   393,   5,   9,   6,    0,   -7 } // '}'
 };
 const GFXfont Dialog_plain_9 PROGMEM = {
-(uint8_t  *)Dialog_plain_9Bitmaps,(GFXglyph *)Dialog_plain_9Glyphs,0x20, 0x7E, 12};
+(uint8_t  *)Dialog_plain_9Bitmaps,(GFXglyph *)Dialog_plain_9Glyphs,0x20, 0x7D, 12};
