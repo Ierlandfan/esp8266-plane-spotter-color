@@ -30,12 +30,15 @@ If the TFT RESET signal is connected to the NodeMCU RST line then define the pin
 in the TFT library User_Config.h file as negative so the library ignores it,
 e.g. TFT_RST -1
 
+The following images are screenshots grabbed from an ILI9341 320x240 pixel display:
+
 <a href="http://imgur.com/tAfLJSf"><img src="http://i.imgur.com/tAfLJSf.png" title="source: imgur.com" /></a>
 
 <a href="http://imgur.com/Kh3NMid"><img src="http://i.imgur.com/Kh3NMid.png" title="source: imgur.com" /></a>
 
-##Original master repository text follows:
 
+
+##Original master repository text follows:
 
 #ESP8266 Plane Spotter Color
 
