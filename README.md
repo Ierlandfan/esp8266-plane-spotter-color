@@ -30,9 +30,9 @@ If the TFT RESET signal is connected to the NodeMCU RST line then define the pin
 in the TFT library User_Config.h file as negative so the library ignores it,
 e.g. TFT_RST -1
 
-http://i.imgur.com/tAfLJSf.png
+[Imgur](http://i.imgur.com/tAfLJSf.png)
 
-http://i.imgur.com/Kh3NMid.png
+[Imgur](http://i.imgur.com/Kh3NMid.png)
 
 
 ##Original master repository text follows:
