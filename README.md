@@ -30,6 +30,11 @@ If the TFT RESET signal is connected to the NodeMCU RST line then define the pin
 in the TFT library User_Config.h file as negative so the library ignores it,
 e.g. TFT_RST -1
 
+http://i.imgur.com/tAfLJSf.png
+
+http://i.imgur.com/Kh3NMid.png
+
+
 ##Original master repository text follows:
 
 
@@ -37,6 +42,8 @@ e.g. TFT_RST -1
 
 This is the repository of the ESP8266 Plane Spotter Color. It downloads data from web APIs and displays aircrafts close
 to your location on a map.
+
+
 
 ## The related blog post
 https://blog.squix.org/2017/01/esp8266-planespotter-color.html
