@@ -282,13 +282,13 @@ void updatePlanesAndDrawMap() {
   if (adsbClient.getNumberOfAircrafts()) {
     String fromString = planeSpotter.drawInfoBox(closestAircraft);
     // Use print stream so the line wraps (tft_->print does not work, kludge is to get the String returned so we can use the print class!)
-    tft.setCursor(0, 480);
+     tft.setCursor(0, tft.height() -1);
     tft.setTextColor(TFT_GREEN, TFT_BLACK);
     tft.setTextDatum(BL_DATUM);
     tft.setTextWrap(1);
     // Using tft.print() means background is not plotted so we must blank out the old text
     // the advantage though is that it auto-wraps to the next line.
-    tft.fillRect(0, 480, tft.width(), tft.height() - 220, TFT_BLACK);
+    tft.fillRect(0, tft.height()-10, tft.width(), 10, TFT_BLACK);
     tft.print(fromString);
     
   }
@@ -308,8 +308,8 @@ void downloadCallback(String filename, uint32_t bytesDownloaded, uint32_t bytesT
   Serial.println(String(bytesDownloaded) + " / " + String(bytesTotal));
   int width = 480;
   int progress = width * bytesDownloaded / bytesTotal;
-  tft.fillRect(20, 220, progress, 5, TFT_WHITE);
+  tft.fillRect(10, 220, progress, 5, TFT_WHITE)
   JpegDec.decodeArray(plane, plane_len);
-  planeSpotter.renderJPEG(20 + progress, 220 - 15);
+  planeSpotter.renderJPEG(15 + progress, 220 - 15);
 }
 
