@@ -37,10 +37,11 @@ See more at https://blog.squix.org
 #include <JPEGDecoder.h>
 
 // Call up the TFT library
-#include <TFT_ILI9341_ESP.h> // Hardware-specific library
+/* Added by Ierlandfan */ 
+#include <TFT_eSPI.h> // Hardware-specific library
+#include <XPT2046_Touchscreen.h>
 
 #include "AdsbExchangeClient.h"
-///#include "ILI9341.h"
 #include "GeoMap.h"
 
 #define TFT_BLACK   0x0000
@@ -58,7 +59,7 @@ enum TextAlignment {
 
 class PlaneSpotter {
   public:
-    PlaneSpotter(TFT_ILI9341_ESP* tft, GeoMap* geoMap);
+    PlaneSpotter(TFT_eSPI* tft, GeoMap* geoMap);
     void copyProgmemToSpiffs(const uint8_t *data, unsigned int length, String filename);
 
     void drawSPIFFSJpeg(String filename, int xpos, int ypos);
@@ -69,11 +70,34 @@ class PlaneSpotter {
     String drawInfoBox(Aircraft closestAircraft);
 
     void drawAircraftHistory(Aircraft aircraft, AircraftHistory history);
-
     void jpegInfo(void);
 
+/* added */
+ void drawMainMenu();
+ void PanAndZoom();
+   void drawString(int x, int y, char *text);
+    
+    void drawString(int x, int y, String text);
+    
+    void setTextAlignment(TextAlignment alignment);
+
+     void setTextColor(uint16_t c);
+    
+    void setTextColor(uint16_t c, uint16_t bg);
+    
+/* End Added */
+    void setTouchScreen(XPT2046_Touchscreen* touchScreen);
+
+    void setTouchScreenCalibration(uint16_t minX, uint16_t minY, uint16_t maxX, uint16_t maxY);
+
+    CoordinatesPixel getTouchPoint();
+ /* End */
+ 
   private:
-    TFT_ILI9341_ESP* tft_;
+    TFT_eSPI* tft_;
+  /* added */
+    XPT2046_Touchscreen* touchScreen_; 
+ /* End */
     GeoMap* geoMap_;
     // Shape of the plane
     // The points are defined as degree on a circle, the first array are the degrees, 
@@ -93,4 +117,3 @@ class PlaneSpotter {
 
   
 };
-
