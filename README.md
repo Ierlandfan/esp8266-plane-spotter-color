@@ -1,5 +1,6 @@
-Adapted by Ierlandfan to make use of the new Graphics library by Bodmer
-(Forum: https://forum.arduino.cc/index.php?topic=443787.120)
+Adapted by Bodmer to make use of the new Graphics library 
+(Forum: https://forum.arduino.cc/index.php?topic=443787.120) and made it suit 480*240. (Have to change a few things here and there)
+
 Thanx to Bodmer for whipping up a working touchsketch. I incorporated that code in the current version and also included the original sketch as seperate sketch. You need https://github.com/PaulStoffregen/XPT2046_Touchscreen for it to work.
 The Dev branch has untested code to make use of the touchscreen. Actually it's a backport of touch (WIP) code from Daniel in the latest version of Planespotter (after May 4) which I couldn't get to work on a ILI9486 with XPT 2046 touchscreen and Bodmer's graphics library.(It segfaults.) The unmodified, original version by Daniel is not resetting so it must have something to do with the touch or graphics part.    
 
