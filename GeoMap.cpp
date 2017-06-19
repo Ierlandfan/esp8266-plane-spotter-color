@@ -34,6 +34,7 @@ GeoMap::GeoMap(MapProvider mapProvider, String apiKey, int mapWidth, int mapHeig
 int GeoMap::getMapWidth() {
   return mapWidth_;
 }
+
 int GeoMap::getMapHeight() {
   return mapHeight_;
 }
@@ -187,5 +188,4 @@ void GeoMap::downloadFile(String url, String filename, ProgressCallback progress
         http.end();
     }
 }
-
 
