@@ -1,3 +1,14 @@
+Adapted by Ierlandfan to make use of the new Graphics library by Bodmer
+(Forum: https://forum.arduino.cc/index.php?topic=443787.120)
+Thanx to Bodmer for whipping up a working touchsketch. I incorporated that in this verson.
+The Dev branch has untested code to make use of the touchscreen. Actually it's a backport of touch (WIP) code from Daniel in the latest version of Planespotter (after May 4) which I couldn't get to work on a ILI9486 with XPT 2046 touchscreen and Bodmer's graphics library.(It segfaults.) The unmodified, original version by Daniel is not resetting so it must have something to do with the touch or graphics part.    
+
+The menustructure is (shortpress) 0 is ZoomAndPan, (Longer press) 1 MainMenu, (Even longer press) 2 manual update 
+The menu's are defined in planespotter.cpp
+The drawing of menu's is working.
+The commands are defined in the sketch but don't work (yet)
+
+
 Adapted by Bodmer for use with latest TFT_ILI9341_ESP and JPEGDecoder library from my repository.
 
 These are the connections assumed for this forked copy of the sketch:
