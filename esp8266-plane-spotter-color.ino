@@ -25,7 +25,6 @@ See more at http://blog.squix.ch
 Adapter by Bodmer to use latest JPEGDecoder library.
 
 Modifed by Ierlandfan to let it use the new graphic Library (TFT_eSPI.h) made by Bodmer so it supports more tft screens
-Modified by Ierlandfan to (WIP) use touch functions
 Forum: https://forum.arduino.cc/index.php?topic=443787.0
 Github: https://github.com/Bodmer/TFT_eSPI
 Ierlandfan 15-06-2017 
@@ -204,14 +203,14 @@ void loop() {
 
   CoordinatesPixel pt = planeSpotter.getTouchPoint();
   
- // if (isTouched && millis() - millisAtLastTouch > 5000) {
- // tft.fillCircle(pt.x, pt.y, 2, TFT_RED);
- //  millisAtLastTouch = millis();
- //   delay(30);
-  //  planeSpotter.drawMainMenu();
-  //  currentPage == '1';
+ if (isTouched && millis() - millisAtLastTouch > 5000) {
+ tft.fillCircle(pt.x, pt.y, 2, TFT_RED);
+ millisAtLastTouch = millis();
+ delay(30);
+ planeSpotter.drawMainMenu();
+ currentPage == '1';
 //Do something here to switch
- 
+ }
 //CoordinatesPixel pt = planeSpotter.getTouchPoint();
   if (isTouched && millis() - millisAtLastTouch > 2000) {
   currentPage == '0';
@@ -222,91 +221,44 @@ void loop() {
     planeSpotter.PanAndZoom();
 
 if ((pt.x>=420) && (pt.x<=480) && (pt.y>=0) && (pt.y<=40)) {
-if (currentPage == '0'){If we are in PanAndZoom menu
+if (currentPage == '0'){
          tft.fillScreen(TFT_BLACK);
 Serial.println("Zoom IN pressed") ;
-currentZoomlevel =  geoMap.getCurrentZoomlevel(); //added in geomap.h
- for (int i =  currentZoomlevel; i--;){
- geoMap.downloadMap(mapCenter, i, _downloadCallback);
-delay(500);  
-geoMap.convertToCoordinates({0,0});
-geoMap.convertToCoordinates({MAP_WIDTH, MAP_HEIGHT});
-tft.fillRect(0, geoMap.getMapHeight(), tft.width(), tft.height() - geoMap.getMapHeight(), TFT_BLACK);
+// currentZoomlevel =  10;
+ for (int i =  10; i++;){ 
+    delay(500);
+  geoMap.downloadMap(mapCenter, i, _downloadCallback);
+  geoMap.convertToCoordinates({0,0});
+  geoMap.convertToCoordinates({MAP_WIDTH, MAP_HEIGHT});
+  tft.fillRect(0, geoMap.getMapHeight(), tft.width(), tft.height() - geoMap.getMapHeight(), TFT_BLACK);
           }
 
  //If we press the Zoom out button
   if ((pt.x>=420) && (pt.x<=480) && (pt.y>=0) && (pt.y<=40)) {
-if (currentPage == '0'){ //If we are in PanAndZoom menu
+if (currentPage == '0'){
           tft.fillScreen(TFT_BLACK);
 Serial.println("Zoom OUT pressed") ;
-currentZoomlevel =  geoMap.getCurrentZoomlevel(); //added in geomap.h
- for (int i =  currentZoomlevel; i--;){
+// currentZoomlevel = 10;
+ for (int i =  10; i++;) { 
+  delay(500);
+   
  geoMap.downloadMap(mapCenter, i, _downloadCallback);
-delay(500);  
-geoMap.convertToCoordinates({0,0});
+  geoMap.convertToCoordinates({0,0});
   geoMap.convertToCoordinates({MAP_WIDTH, MAP_HEIGHT});
  tft.fillRect(0, geoMap.getMapHeight(), tft.width(), tft.height() - geoMap.getMapHeight(), TFT_BLACK);
-  
-    //If we press the pan_left button
- // if ((pt.x>=0) && (pt.x<=40) && (pt.y>=120) && (pt.y<=160)) {
-  //       tft.fillScreen(TFT_BLACK);
-//int getMapWidth =  geoMap.getMapWidth();
-// for (int i =  getMapWidth; i++;) { 
-//  delay(500);
-//  geoMap.downloadMap(mapCenter, i, _downloadCallback);
-//  northWestBound = geoMap.convertToCoordinates({0,0});
- // southEastBound = geoMap.convertToCoordinates({MAP_WIDTH, MAP_HEIGHT});
-// tft.fillRect(0, geoMap.getMapHeight(), tft.width(), tft.height() - geoMap.getMapHeight(), TFT_BLACK);
-//      }
-//    }
- 
-//If we press the pan_right button
- // if ((pt.x>=440) && (pt.x<=480) && (pt.y>=120) && (pt.y<=160)) {
-//          tft.fillScreen(TFT_BLACK);
-//int getMapWidth =  geoMap.getMapWidth();
-// for (int i =  getMapWidth; i++;) { 
-//  delay(500);
- // geoMap.downloadMap(mapCenter, i, _downloadCallback);
- // northWestBound = geoMap.convertToCoordinates({0,0});
- // southEastBound = geoMap.convertToCoordinates({MAP_WIDTH, MAP_HEIGHT});
- //tft.fillRect(0, geoMap.getMapHeight(), tft.width(), tft.height() - geoMap.getMapHeight(), TFT_BLACK);
-  //        }
-  //   }
-
-
-  //If we press the pan_up button
-//  if ((pt.x>=220) && (pt.x<=260) && (pt.y>=200) && (pt.y<=240)) {
-//         tft.fillScreen(TFT_BLACK);
-//  getMapHeight =  geoMap.getMapHeight();
-// for (int i =  getMapHeight) { 
-//  delay(500);
-//  geoMap.downloadMap(mapCenter, getMapHeight[i++], _downloadCallback);
-//  northWestBound = geoMap.convertToCoordinates({0,0});
-//  southEastBound = geoMap.convertToCoordinates({MAP_WIDTH, MAP_HEIGHT});
-// tft.fillRect(0, geoMap.getMapHeight(), tft.width(), tft.height() - geoMap.getMapHeight(), TFT_BLACK);
-
-  //        }
-   //  }
-
-//If we press the pan_down button
-//  if ((pt.x>=220) && (pt.x<=260) && (pt.y>=0) && (pt.y<=40)) {
-//        tft.fillScreen(TFT_BLACK);
-//   getMapHeight =  geoMap.getMapHeight();
-// for (int i =  getMapHeight) { 
-//  delay(500);
-//  geoMap.downloadMap(mapCenter, getMapHeight[i--], _downloadCallback);
-//  northWestBound = geoMap.convertToCoordinates({0,0});
-//  southEastBound = geoMap.convertToCoordinates({MAP_WIDTH, MAP_HEIGHT});
-//tft.fillRect(0, geoMap.getMapHeight(), tft.width(), tft.height() - geoMap.getMapHeight(), TFT_BLACK);
- 
-
-           } //Probably missing a few } here and incorrect placing inside the loop, I hate brackets
+          }
       }
   }
-} //End loop
+}
 
 
-  
+
+
+
+        
+  }
+} 
+}
 //Serial.println("Heap: " + String(ESP.getFreeHeap()));
 /* added */
 
