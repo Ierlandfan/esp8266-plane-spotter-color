@@ -30,7 +30,7 @@ See more at https://blog.squix.org
 #include "PlaneSpotter.h"
 #include <SPI.h>
 
-PlaneSpotter::PlaneSpotter(TFT_ILI9341_ESP* tft, GeoMap* geoMap) {
+PlaneSpotter::PlaneSpotter(TFT_eSPI* tft, GeoMap* geoMap) {
   tft_ = tft;
   geoMap_ = geoMap;
 }
@@ -143,9 +143,9 @@ void PlaneSpotter::drawPlane(Aircraft aircraft, boolean isSpecial) {
 }
 
 String PlaneSpotter::drawInfoBox(Aircraft closestAircraft) {
-  int line1 = geoMap_->getMapHeight() + 10;
-  int line2 = geoMap_->getMapHeight() + 20;
-  int line3 = geoMap_->getMapHeight() + 30;
+  int line1 = geoMap_->getMapHeight() + 20;
+  int line2 = geoMap_->getMapHeight() + 30;
+  int line3 = geoMap_->getMapHeight() + 40;
   int right = tft_->width();
   //tft_->fillRect(0, geoMap_->getMapHeight(), tft_->width(), tft_->height() - geoMap_->getMapHeight(), TFT_BLACK);
   if (closestAircraft.call != "") {
@@ -156,7 +156,7 @@ String PlaneSpotter::drawInfoBox(Aircraft closestAircraft) {
     tft_->setTextColor(TFT_WHITE, TFT_BLACK);
     tft_->drawString(closestAircraft.call, 0, line1, GFXFONT );
 
-    tft_->setTextPadding(320 - xwidth);
+    tft_->setTextPadding(480 - xwidth);
     tft_->setTextDatum(BR_DATUM);
     tft_->drawString(closestAircraft.aircraftType, right - 2, line1, GFXFONT );
     
@@ -215,3 +215,113 @@ void PlaneSpotter::jpegInfo() {
   Serial.println("");
 }
 
+/* addded */
+/* added */
+/* addded */
+/* added */
+
+
+void PlaneSpotter::drawMainMenu() {
+  tft_->setTextFont(2);
+  String commands[] = {"Track", "Weather Station", "Planespotter"};
+  int numberOfCommands = 3;
+  int fontHeight = 24;
+  for (int i = 0; i < numberOfCommands; i++) {
+     int buttonHeight = 40;
+    tft_->drawFastHLine(0, i * buttonHeight, tft_->width(), TFT_WHITE);
+    drawString(10, i * buttonHeight + (buttonHeight - fontHeight) / 2, commands[i]); 
+
+  }
+}
+
+
+
+void PlaneSpotter::PanAndZoom() {
+  tft_->setTextFont(2);
+        int fontHeight = 24;
+        String Zoom_in = "Zoom in";
+        String Zoom_out = "Zoom out";
+        String UP = "Up";
+        String Down = "Down"; 
+        String Left = "Left";
+        String Right = "Right";
+     drawString(420, 230 - fontHeight, Zoom_in );
+     drawString(420, 10 + fontHeight, Zoom_out );
+     drawString(240, 186 + fontHeight, UP );
+     drawString(240, 10  + fontHeight, Down );
+     drawString(10, 96 - fontHeight, Left );
+     drawString(470,96 - fontHeight, Right );
+
+ 
+}
+
+ 
+void PlaneSpotter::drawString(int x, int y, char *text) {
+  int16_t x1, y1;
+  uint16_t w, h;
+  tft_->setTextWrap(false);
+
+ tft_->getTextBounds(text, 0, 0, &x1, &y1, &w, &h);
+  switch (alignment_) {
+    case LEFT:
+      x1 = x;
+      break;
+    case CENTER:
+      x1 = x - w / 2;
+      break;
+    case RIGHT:
+      x1 = x - w;
+      break;
+  }
+  if (textColor_ != backgroundColor_) {
+    tft_->fillRect(x1, y - h -1, w + 2, h + 3, backgroundColor_);
+  }
+  tft_->setCursor(x1, y);
+  tft_->print(text);
+}
+
+void PlaneSpotter::drawString(int x, int y, String text) {
+  char buf[text.length()+2];
+  text.toCharArray(buf, text.length() + 1);
+  drawString(x, y, buf);
+}
+
+void PlaneSpotter::setTextColor(uint16_t c) {
+  setTextColor(c, c);
+}
+void PlaneSpotter::setTextColor(uint16_t c, uint16_t bg) {
+  textColor_ = c;
+  backgroundColor_ = bg;
+  tft_->setTextColor(textColor_, backgroundColor_);
+}
+
+void PlaneSpotter::setTextAlignment(TextAlignment alignment) {
+  alignment_ = alignment;
+}
+/* End */
+
+
+
+
+void PlaneSpotter::setTouchScreen(XPT2046_Touchscreen* touchScreen) {
+  touchScreen_ = touchScreen;
+}
+
+
+//calibrate not quite working, missing minX etc parameters
+void PlaneSpotter::setTouchScreenCalibration(uint16_t minX, uint16_t minY, uint16_t maxX, uint16_t maxY) {
+//  minX_ = minX;
+//  minY_ = minY;
+//  maxX_ = maxX;
+//  maxY_ = maxY;
+}
+
+CoordinatesPixel PlaneSpotter::getTouchPoint() {
+    TS_Point pt = touchScreen_->getPoint();
+    CoordinatesPixel p;
+ //   p.x = tft_->width() * (pt.x - minX_) / (maxX_ - minX_);
+     p.x = tft_->width() * (pt.x);
+ //  p.y = tft_->height() * (pt.y - minY_) / (maxY_ - minY_);
+    p.y = tft_->height()* (pt.y) ;
+    return p;
+}
