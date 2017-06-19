@@ -23,6 +23,13 @@ SOFTWARE.
 See more at http://blog.squix.ch
 
 Adapter by Bodmer to use latest JPEGDecoder library.
+
+Modifed by Ierlandfan to let it use the new graphic Library (TFT_eSPI.h) made by Bodmer so it supports more tft screens
+Modified by Ierlandfan to (WIP) use touch functions
+Forum: https://forum.arduino.cc/index.php?topic=443787.0
+Github: https://github.com/Bodmer/TFT_eSPI
+Ierlandfan 15-06-2017 
+
 */
 
 #include <Arduino.h>
@@ -39,6 +46,19 @@ Adapter by Bodmer to use latest JPEGDecoder library.
 #include <FS.h>
 
 #include <SPI.h>
+
+#define PIN_D0 16
+#define PIN_D1  5
+#define PIN_D2  4
+#define PIN_D3  0
+#define PIN_D4  2
+#define PIN_D5 14 // SCLK
+#define PIN_D6 12 // MISO
+#define PIN_D7 13 // MOSI
+#define PIN_D8 15
+#define PIN_D9  3
+#define PIN_D10 1
+
 
 // Wifi Libraries
 #include <ESP8266WiFi.h>
@@ -62,7 +82,17 @@ Adapter by Bodmer to use latest JPEGDecoder library.
 #include "GeoMap.h"
 
 // Initialize the TFT
-TFT_ILI9341_ESP tft = TFT_ILI9341_ESP();
+/* Added by Ierlandfan */ 
+#include <TFT_eSPI.h> // Hardware-specific library
+#include <XPT2046_Touchscreen.h>
+TFT_eSPI tft = TFT_eSPI();       // Invoke custom library
+#define CS_PIN  PIN_D2 // XPT2046 chip select
+#define TFT_CS  PIN_D8 // TFT chip select
+#define LED_PIN PIN_D0 // LED not used
+XPT2046_Touchscreen ts(CS_PIN);
+void calibrateTouchScreen();
+
+
 
 WifiLocator locator;
 AdsbExchangeClient adsbClient;
@@ -76,16 +106,25 @@ Coordinates mapCenter;
 // Check http://www.virtualradarserver.co.uk/Documentation/Formats/AircraftList.aspx
 // to craft this query to your needs
 // lat=47.424341887&lng=8.56877803&fDstL=0&fDstU=10&fAltL=0&fAltL=1500&fAltU=10000
-//const String QUERY_STRING = "fDstL=0&fDstU=20&fAltL=0&fAltL=1000&fAltU=10000";
+//const String QUERY_STRING = "fDstL=0&fDstU=50&fAltL=0&fAltL=0&fAltU=50000";
 // airport zürich is on 1410ft => hide landed airplanes
-const String QUERY_STRING = "fAltL=1500&trFmt=sa";
+const String QUERY_STRING = "fDstL=0&fDstU=30";
 
 void downloadCallback(String filename, uint32_t bytesDownloaded, uint32_t bytesTotal);
 ProgressCallback _downloadCallback = downloadCallback;
 
+/* added */
+void updatePlanesAndDrawMap();
+void calibrateTouchScreen();
+
 Coordinates northWestBound;
 Coordinates southEastBound;
 
+long millisAtLastUpdate = 0;
+long millisAtLastTouch = 0;
+uint8_t currentZoom = MAP_ZOOM;
+
+/* added */
 
 void setup() {
 
@@ -122,7 +161,7 @@ void setup() {
   
   WiFiManager wifiManager;
   // Uncomment for testing wifi manager
-  //wifiManager.resetSettings();
+//wifiManager.resetSettings();
   
   //wifiManager.setAPCallback(configModeCallback);
 
@@ -139,16 +178,139 @@ void setup() {
 
   delay(500);
   
-  geoMap.downloadMap(mapCenter, MAP_ZOOM, _downloadCallback);
-
+   geoMap.downloadMap(mapCenter, currentZoom, _downloadCallback);
+/* added */
   northWestBound = geoMap.convertToCoordinates({0,0});
   southEastBound = geoMap.convertToCoordinates({MAP_WIDTH, MAP_HEIGHT});
-  tft.fillRect(0, geoMap.getMapHeight(), tft.width(), tft.height() - geoMap.getMapHeight(), TFT_BLACK);
+ tft.fillRect(0, geoMap.getMapHeight(), tft.width(), tft.height() - geoMap.getMapHeight(), TFT_BLACK);
+
+/* added */
+ts.begin();
+planeSpotter.setTouchScreen(&ts);
 }
 
+/* added */ 
+/* added */ 
+int currentPage = 0;
 
 void loop() {
-  //Serial.println("Heap: " + String(ESP.getFreeHeap()));
+
+  boolean isTouched = ts.touched();
+  if(millis() - millisAtLastUpdate > 10000 && !isTouched) {
+    updatePlanesAndDrawMap();
+    currentPage == '2';
+    millisAtLastUpdate = millis();
+  }
+
+  CoordinatesPixel pt = planeSpotter.getTouchPoint();
+  
+ // if (isTouched && millis() - millisAtLastTouch > 5000) {
+ // tft.fillCircle(pt.x, pt.y, 2, TFT_RED);
+ //  millisAtLastTouch = millis();
+ //   delay(30);
+  //  planeSpotter.drawMainMenu();
+  //  currentPage == '1';
+//Do something here to switch
+ 
+//CoordinatesPixel pt = planeSpotter.getTouchPoint();
+  if (isTouched && millis() - millisAtLastTouch > 2000) {
+  currentPage == '0';
+  Serial.println("PanAndZoom Pressed");
+   tft.fillCircle(pt.x, pt.y, 2, TFT_RED);
+   millisAtLastTouch = millis();
+    delay(30);
+    planeSpotter.PanAndZoom();
+
+if ((pt.x>=420) && (pt.x<=480) && (pt.y>=0) && (pt.y<=40)) {
+if (currentPage == '0'){If we are in PanAndZoom menu
+         tft.fillScreen(TFT_BLACK);
+Serial.println("Zoom IN pressed") ;
+currentZoomlevel =  geoMap.getCurrentZoomlevel(); //added in geomap.h
+ for (int i =  currentZoomlevel; i--;){
+ geoMap.downloadMap(mapCenter, i, _downloadCallback);
+delay(500);  
+geoMap.convertToCoordinates({0,0});
+geoMap.convertToCoordinates({MAP_WIDTH, MAP_HEIGHT});
+tft.fillRect(0, geoMap.getMapHeight(), tft.width(), tft.height() - geoMap.getMapHeight(), TFT_BLACK);
+          }
+
+ //If we press the Zoom out button
+  if ((pt.x>=420) && (pt.x<=480) && (pt.y>=0) && (pt.y<=40)) {
+if (currentPage == '0'){ //If we are in PanAndZoom menu
+          tft.fillScreen(TFT_BLACK);
+Serial.println("Zoom OUT pressed") ;
+currentZoomlevel =  geoMap.getCurrentZoomlevel(); //added in geomap.h
+ for (int i =  currentZoomlevel; i--;){
+ geoMap.downloadMap(mapCenter, i, _downloadCallback);
+delay(500);  
+geoMap.convertToCoordinates({0,0});
+  geoMap.convertToCoordinates({MAP_WIDTH, MAP_HEIGHT});
+ tft.fillRect(0, geoMap.getMapHeight(), tft.width(), tft.height() - geoMap.getMapHeight(), TFT_BLACK);
+  
+    //If we press the pan_left button
+ // if ((pt.x>=0) && (pt.x<=40) && (pt.y>=120) && (pt.y<=160)) {
+  //       tft.fillScreen(TFT_BLACK);
+//int getMapWidth =  geoMap.getMapWidth();
+// for (int i =  getMapWidth; i++;) { 
+//  delay(500);
+//  geoMap.downloadMap(mapCenter, i, _downloadCallback);
+//  northWestBound = geoMap.convertToCoordinates({0,0});
+ // southEastBound = geoMap.convertToCoordinates({MAP_WIDTH, MAP_HEIGHT});
+// tft.fillRect(0, geoMap.getMapHeight(), tft.width(), tft.height() - geoMap.getMapHeight(), TFT_BLACK);
+//      }
+//    }
+ 
+//If we press the pan_right button
+ // if ((pt.x>=440) && (pt.x<=480) && (pt.y>=120) && (pt.y<=160)) {
+//          tft.fillScreen(TFT_BLACK);
+//int getMapWidth =  geoMap.getMapWidth();
+// for (int i =  getMapWidth; i++;) { 
+//  delay(500);
+ // geoMap.downloadMap(mapCenter, i, _downloadCallback);
+ // northWestBound = geoMap.convertToCoordinates({0,0});
+ // southEastBound = geoMap.convertToCoordinates({MAP_WIDTH, MAP_HEIGHT});
+ //tft.fillRect(0, geoMap.getMapHeight(), tft.width(), tft.height() - geoMap.getMapHeight(), TFT_BLACK);
+  //        }
+  //   }
+
+
+  //If we press the pan_up button
+//  if ((pt.x>=220) && (pt.x<=260) && (pt.y>=200) && (pt.y<=240)) {
+//         tft.fillScreen(TFT_BLACK);
+//  getMapHeight =  geoMap.getMapHeight();
+// for (int i =  getMapHeight) { 
+//  delay(500);
+//  geoMap.downloadMap(mapCenter, getMapHeight[i++], _downloadCallback);
+//  northWestBound = geoMap.convertToCoordinates({0,0});
+//  southEastBound = geoMap.convertToCoordinates({MAP_WIDTH, MAP_HEIGHT});
+// tft.fillRect(0, geoMap.getMapHeight(), tft.width(), tft.height() - geoMap.getMapHeight(), TFT_BLACK);
+
+  //        }
+   //  }
+
+//If we press the pan_down button
+//  if ((pt.x>=220) && (pt.x<=260) && (pt.y>=0) && (pt.y<=40)) {
+//        tft.fillScreen(TFT_BLACK);
+//   getMapHeight =  geoMap.getMapHeight();
+// for (int i =  getMapHeight) { 
+//  delay(500);
+//  geoMap.downloadMap(mapCenter, getMapHeight[i--], _downloadCallback);
+//  northWestBound = geoMap.convertToCoordinates({0,0});
+//  southEastBound = geoMap.convertToCoordinates({MAP_WIDTH, MAP_HEIGHT});
+//tft.fillRect(0, geoMap.getMapHeight(), tft.width(), tft.height() - geoMap.getMapHeight(), TFT_BLACK);
+ 
+
+           } //Probably missing a few } here and incorrect placing inside the loop, I hate brackets
+      }
+  }
+} //End loop
+
+
+  
+//Serial.println("Heap: " + String(ESP.getFreeHeap()));
+/* added */
+
+void updatePlanesAndDrawMap() {
   adsbClient.updateVisibleAircraft(QUERY_STRING + "&lat=" + String(mapCenter.lat, 6) + "&lng=" + String(mapCenter.lon, 6) + "&fNBnd=" + String(northWestBound.lat, 9) + "&fWBnd=" + String(northWestBound.lon, 9) + "&fSBnd=" + String(southEastBound.lat, 9) + "&fEBnd=" + String(southEastBound.lon, 9));
 
   Aircraft closestAircraft = adsbClient.getClosestAircraft(mapCenter.lat, mapCenter.lon);
@@ -163,19 +325,20 @@ void loop() {
     planeSpotter.drawAircraftHistory(aircraft, history);
     planeSpotter.drawPlane(aircraft, aircraft.call == closestAircraft.call);
   }
-  //Serial.print("Time to plot planes is: "); Serial.println(millis() - pplot);
+//  Serial.print("Time to plot planes is: "); Serial.println(millis() - pplot);
   
   if (adsbClient.getNumberOfAircrafts()) {
     String fromString = planeSpotter.drawInfoBox(closestAircraft);
     // Use print stream so the line wraps (tft_->print does not work, kludge is to get the String returned so we can use the print class!)
-    tft.setCursor(0, 228);
+    tft.setCursor(0, 480);
     tft.setTextColor(TFT_GREEN, TFT_BLACK);
     tft.setTextDatum(BL_DATUM);
     tft.setTextWrap(1);
     // Using tft.print() means background is not plotted so we must blank out the old text
     // the advantage though is that it auto-wraps to the next line.
-    tft.fillRect(0, 220, tft.width(), tft.height() - 220, TFT_BLACK);
+    tft.fillRect(0, 480, tft.width(), tft.height() - 220, TFT_BLACK);
     tft.print(fromString);
+    
   }
   else tft.fillRect(0, geoMap.getMapHeight(), tft.width(), tft.height() - geoMap.getMapHeight(), TFT_BLACK);
   
@@ -191,11 +354,10 @@ void loop() {
 
 void downloadCallback(String filename, uint32_t bytesDownloaded, uint32_t bytesTotal) {
   Serial.println(String(bytesDownloaded) + " / " + String(bytesTotal));
-  int width = 320;
+  int width = 480;
   int progress = width * bytesDownloaded / bytesTotal;
-  tft.fillRect(10, 220, progress, 5, TFT_WHITE);
+  tft.fillRect(20, 220, progress, 5, TFT_WHITE);
   JpegDec.decodeArray(plane, plane_len);
-  planeSpotter.renderJPEG(15 + progress, 220 - 15);
+  planeSpotter.renderJPEG(20 + progress, 220 - 15);
 }
-
 
