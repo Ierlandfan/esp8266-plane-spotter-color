@@ -9,7 +9,7 @@ The drawing of menu's is working.
 The commands are defined in the sketch but don't work (yet)
 
 
-Original adapted by Bodmer for use with latest TFT_ILI9341_ESP and JPEGDecoder library from my repository.
+Original adapted by Bodmer for use with latest TFT_ILI9341_ESP and JPEGDecoder library from his repository.
 
 These are the connections assumed for this forked copy of the sketch:
 
