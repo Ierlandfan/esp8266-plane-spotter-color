@@ -67,7 +67,10 @@ class GeoMap {
     void downloadMap(Coordinates mapCenter, int zoom, ProgressCallback progressCallback);
     void downloadMap(Coordinates mapCenter, int zoom);
     String getMapName();
-    CoordinatesPixel convertToPixel(Coordinates coordinates);
+/* Added for zoomlevel change by touch */
+    String getCurrentZoomlevel(int zoom);
+/* Added for zoomlevel change by touch */ 
+   CoordinatesPixel convertToPixel(Coordinates coordinates);
     Coordinates convertToCoordinates(CoordinatesPixel coordinatesPixel);
     CoordinatesTiles convertToTiles(Coordinates coordinates);
     Coordinates convertToCoordinatesFromTiles(CoordinatesTiles tiles);
@@ -77,4 +80,3 @@ class GeoMap {
     int getMapHeight();
   
 };
-
