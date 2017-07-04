@@ -23,6 +23,8 @@ SOFTWARE.
 See more at http://blog.squix.ch
 */
 
+/* Edited by Ierlandfan to incorporate more keys */
+
 #pragma once
 
 #include <Arduino.h>
