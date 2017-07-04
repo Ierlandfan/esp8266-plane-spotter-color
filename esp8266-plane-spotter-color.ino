@@ -23,7 +23,10 @@
 
   See more at http://blog.squix.ch
   (Tower picture was based on http://www.buildingsingapore.teoyusiang.com/) //No longer in use
-  (Airplane picture used for identifying in the infobox (rightdown corner box comes from )
+  (Airplane pictures used for identifying in the infobox (Middle corner box) are made by Ian K.
+  Please register to download all the pictures, I included some here for testing 
+  (https://radarspotting.com/forum/index.php?action=tpmod;dl=cat288)
+ 
   ( Airport ICAO comes from https://openflights.org/data.html, please donate although not required)
 */
 
