@@ -1,8 +1,17 @@
 
 
-Adapted by me to make use of the new Graphics library because I had a ILI9486 with touch originally designed for a Raspberry Pi.
-It's a 3.5 Inch TFT aka Waveshare clone. 
-It's a mix between the lastest Planespotter by Daniel and Bodmer's work.
+Adapted by me to make use of the new Graphics library by Bodmer because I had a ILI9486 with touch originally designed for a Raspberry Pi. It's a 3.5 Inch TFT aka Waveshare clone. It's a mix between the lastest Planespotter by Daniel and Bodmer's work.
+The Silhouettes are downloaded from my private server so if you want that too you have to unzip the silhouettes somewhere on a server
+and they will be downloaded when neccesary (and stored to SPIFFS)  When a plane is not found it downloads the corresponding sihouette (Based on ICAO code) and stores it to SPIFFS. when a plane is found on SPIFFS it uses the already available image. That's why I did not included the images. (Well for reference and to get the idea you can find a few under images)
+
+Images can be found here. https://radarspotting.com/forum/index.php?action=tpmod;dl=cat288. I used the images from Ian K.
+Those are black silhouettes with a lightblue background, that also explains the matching blue blackground behind the interface  
+
+If everything is not well with a plane you 'll also see a red sign when there is a Emergency (Sqwak 7700) 
+Otherwise just the Sqwak code in white.  I added 7000 (VFR) because I am more interested in GA and LSA/MLA/Ultralight/Gliders and that kind of traffic. For Dutch purposes I made a difference between GA, Gliders and Ultralight based on the Registration code. The text Type and the color will change between GA, Ultralight, Jet, Helicopter, Sea Plane etc. based on model (Species).   
+This is different for other Countries but can be looked up and can easily be adapted for that specific country. 
+
+It also shows the Airline it belongs to in the upper right corner. 
 
 (Forum: https://forum.arduino.cc/index.php?topic=443787.120) and made it suit 480*320. 
 
@@ -16,7 +25,10 @@ Have to ask Bodmer how to fix thatso we can make use of a unmodified version, bu
 Screenshot of the new version: 
 <a href="https://github.com/Ierlandfan/esp8266-plane-spotter-color/blob/dev/images/20170704_095616.jpg"><img src="https://github.com/Ierlandfan/esp8266-plane-spotter-color/blob/dev/images/20170704_095616.jpg" title="source: Images" /></a>
 Thanx to Bodmer for whipping up a working touchsketch. I incorporated that code in the current version and also included the original sketch as seperate sketch. You need https://github.com/PaulStoffregen/XPT2046_Touchscreen for it to work.
-The Dev branch has code for touch but that's a WIP. It's hashed out at the moment even though parts are working. (Zoom is working)   
+This branch has code for touch but that's a WIP. It's hashed out at the moment even though parts are working. (Zoom is working)   
+
+Todo -- Stability, it occasionally crashes.
+Todo -- Add the touchcode. I think I will use a prebuilt menu library (For example JOS) because otherwise there a re a lot of if's and I hate IF's and Brackets. 
 
 The idea behind the menustructure is (shortpress) 0 is ZoomAndPan, (Longer press) 1 MainMenu, (Even longer press) 2 manual update 
 The menu's are defined in planespotter.cpp. The commands are working (but hashed out) because there are to much if's and I hate brackets and IF's so maybe I will use JOS for the menu and touch structure.
