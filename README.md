@@ -1,15 +1,20 @@
 
 
-Adapted by Bodmer to make use of the new Graphics library 
-(Forum: https://forum.arduino.cc/index.php?topic=443787.120) and made it suit 480*320. (Have to change a few things here and there)
+Adapted by me to make use of the new Graphics library. It's a mix between the lastest Planespotter and Bodmer's work.
+(Forum: https://forum.arduino.cc/index.php?topic=443787.120) and made it suit 480*320. 
+
+I added a few functions to Bodmer's incredible TFT_eSPI library and included them for reference. 
+I didn't fork that one since originally I just wanted to make the new Planespotter work and there are (already) built-in solutions but that would take me more time to figure those out so I decided to simpy add the missing functions from AdafruitGFX.    
+  
+Changed the complete interface.
 
 Thanx to Bodmer for whipping up a working touchsketch. I incorporated that code in the current version and also included the original sketch as seperate sketch. You need https://github.com/PaulStoffregen/XPT2046_Touchscreen for it to work.
 The Dev branch has code for touch but that's a WIP. It's hashed out at the moment even though parts are working. (Zoom is working)   
 
-The menustructure is (shortpress) 0 is ZoomAndPan, (Longer press) 1 MainMenu, (Even longer press) 2 manual update 
+The idea behind the menustructure is (shortpress) 0 is ZoomAndPan, (Longer press) 1 MainMenu, (Even longer press) 2 manual update 
 The menu's are defined in planespotter.cpp
 The drawing of menu's is working.
-The commands are defined in the sketch but don't work (yet)
+
 
 
 Original adapted by Bodmer for use with latest TFT_ILI9341_ESP and JPEGDecoder library from his repository.
