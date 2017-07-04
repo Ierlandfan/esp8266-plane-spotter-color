@@ -24,7 +24,6 @@ See more at https://blog.squix.org
 */
 #pragma once
 #include <Arduino.h>
-#define FS_NO_GLOBALS
 #include <FS.h>
 #include <ESP8266WiFi.h>
 #include <ESP8266WiFiMulti.h>
@@ -32,7 +31,8 @@ See more at https://blog.squix.org
 
 #define MAPQUEST_TILE_LENGTH 256.0
 
-typedef void (*ProgressCallback)(String fileName, uint32_t bytesDownloaded, uint32_t bytesTotal);
+
+typedef void (*ProgressCallback)(String fileName, uint32_t bytesDownloaded, uint32_t bytesTotal, boolean isFirstCall);
 
 enum MapProvider {
   MapQuest,
@@ -64,13 +64,12 @@ class GeoMap {
 
   public:
     GeoMap(MapProvider mapProvider, String apiKey, int mapWidth, int mapHeight);
+    void downloadsilhouette(String url, String filename);
     void downloadMap(Coordinates mapCenter, int zoom, ProgressCallback progressCallback);
     void downloadMap(Coordinates mapCenter, int zoom);
     String getMapName();
-/* Added for zoomlevel change by touch */
-    String getCurrentZoomlevel(int zoom);
-/* Added for zoomlevel change by touch */ 
-   CoordinatesPixel convertToPixel(Coordinates coordinates);
+    int getCurrentZoomlevel();
+    CoordinatesPixel convertToPixel(Coordinates coordinates);
     Coordinates convertToCoordinates(CoordinatesPixel coordinatesPixel);
     CoordinatesTiles convertToTiles(Coordinates coordinates);
     Coordinates convertToCoordinatesFromTiles(CoordinatesTiles tiles);
@@ -80,3 +79,6 @@ class GeoMap {
     int getMapHeight();
   
 };
+
+
+
