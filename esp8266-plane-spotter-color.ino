@@ -22,7 +22,8 @@
   SOFTWARE.
 
   See more at http://blog.squix.ch
-  (Tower picture was based on http://www.buildingsingapore.teoyusiang.com/) //No longer in use
+  /* Modified by Ierlandfan 
+
   (Airplane pictures used for identifying in the infobox (Middle corner box) are made by Ian K.
   Please register to download all the pictures, I included some here for testing 
   (https://radarspotting.com/forum/index.php?action=tpmod;dl=cat288)
@@ -217,6 +218,7 @@ void loop () {
     Serial.println(currentUpdateInterval);  
 
     updatePlanesAndDrawMap() ;
+   delay(1000);
  //Or just update when closestplane -- 
   }
 
@@ -225,21 +227,10 @@ void loop () {
 
 
 /*
-void loopB(){
+void loop(){
   boolean isTouched = ts.touched();
-  // Start loopPart1
-
-  if (isTouched && millis() - millisAtLastTouch > 1000) {//If we want to touch a plane it will be less so this is quite high
-      millisAtLastUpdate = millis();
-      updatePlanesAndDrawMap();
-  currentPage ='0';
-  }
-  }
-}
-*/
 
 /*
-  //Start loop Part2
   CoordinatesPixel pt = planeSpotter.getTouchPoint();
   if (currentPage == '0'){
   boolean isTouched = ts.touched();
@@ -354,7 +345,7 @@ void loopB(){
 */
 
 
-/// Where's the plane ?????? --- Have to fix this !!! // Set this in the loop!
+// Where's the plane ?????? --- Have to fix this !!! // Set this in the loop!
 void downloadCallback(String filename, uint32_t bytesDownloaded, uint32_t bytesTotal, boolean isFirstCall) {
   if (isFirstCall) {
     tft.fillRect(0, geoMap.getMapHeight(), tft.getWidth(), tft.getHeight() - geoMap.getMapHeight(), TFT_BLACK);
