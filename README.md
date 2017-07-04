@@ -1,7 +1,10 @@
 
 
-Adapted by me to make use of the new Graphics library. It's a mix between the lastest Planespotter and Bodmer's work.
+Adapted by me to make use of the new Graphics library because I had a ILI9486 with touch originally designed for a Raspberry Pi.
+It's a 3.5 Inch TFT aka Waveshare clone. 
+It's a mix between the lastest Planespotter and Bodmer's work.
 (Forum: https://forum.arduino.cc/index.php?topic=443787.120) and made it suit 480*320. 
+
 
 I added a few functions to Bodmer's incredible TFT_eSPI library and included them for reference. 
 I didn't fork that one since originally I just wanted to make the new Planespotter work and there are (already) built-in solutions but that would take me more time to figure those out so I decided to simpy add the missing functions from AdafruitGFX.    
