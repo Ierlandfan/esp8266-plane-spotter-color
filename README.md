@@ -1,4 +1,4 @@
-
+I feel obliged to fix the animation..it should be a plane flying across the screen while loading, there's a unwanted piece of code which screws up now, will fix it.
 
 Adapted by me to make use of the new Graphics library by Bodmer because I had a ILI9486 with touch originally designed for a Raspberry Pi. It's a 3.5 Inch TFT aka Waveshare clone. It's a mix between the lastest Planespotter by Daniel and Bodmer's work.
 The Silhouettes are downloaded from my private server so if you want that too you have to unzip the silhouettes somewhere on a server
