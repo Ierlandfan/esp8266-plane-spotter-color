@@ -22,13 +22,15 @@ SOFTWARE.
 
 See more at http://blog.squix.ch
 */
-
+/* Edited by Bodmer */
+/* Modified bij Ierlandfan to incorporate more keys */
 #include "AdsbExchangeClient.h"
 
 
 AdsbExchangeClient::AdsbExchangeClient() {
 
 }
+
 
 void AdsbExchangeClient::updateVisibleAircraft(String searchQuery) {
   JsonStreamingParser parser;
@@ -45,9 +47,8 @@ void AdsbExchangeClient::updateVisibleAircraft(String searchQuery) {
     return;
   }
 
-
-  //Serial.print("Requesting URL: ");
-  //Serial.println(url);
+  Serial.print("Requesting URL: ");
+  Serial.println(url);
 
   // This will send the request to the server
   client.print(String("GET ") + url + " HTTP/1.1\r\n" +
@@ -145,10 +146,22 @@ void AdsbExchangeClient::value(String value) {
     aircrafts[index].toShort = value.substring(4, indexOfFirstComma);
   } else if (currentKey == "OpIcao") {
     aircrafts[index].operatorCode = value;
+  } else if (currentKey == "Reg") {
+    Serial.println("Saw Reg " + value);
+    aircrafts[index].registration = value;
+ } else if (currentKey == "Op") {
+    Serial.println("Saw Op " + value);
+    aircrafts[index].airlineOperator = value;
+  } else if (currentKey == "Type") {
+    Serial.println("Saw Plane type " + value);
+    aircrafts[index].Type = value;
   } else if (currentKey == "Dst") {
     aircrafts[index].distance = value.toFloat();
   } else if (currentKey == "Mdl") {
     aircrafts[index].aircraftType = value;
+    Serial.println("Saw Model " + value);
+  } else if (currentKey == "Sqk") {
+    aircrafts[index].Sqwak = value;
   } else if (currentKey == "Trak") {
     aircrafts[index].heading = value.toFloat();
   } else if (currentKey == "Alt") {
@@ -159,12 +172,21 @@ void AdsbExchangeClient::value(String value) {
     aircrafts[index].lon = value.toFloat();
   } else if (currentKey == "Spd") {
     aircrafts[index].speed = value.toFloat();
+  } else if (currentKey == "Vsi") {
+    Serial.println("Saw Vspeed " + value);
+    aircrafts[index].vspeed = value;
   } else if (currentKey == "Icao") {
     aircrafts[index].icao = value;
   } else if (currentKey == "Call") {
-    Serial.println("Saw " + value);
+    Serial.println("Saw Call " + value);
     aircrafts[index].call = value;
-  } else if (currentKey == "PosStale") {
+  } else if (currentKey == "Species") {
+    Serial.println("Species/Type of aircraft" + value);
+    aircrafts[index].species = value.toFloat();  
+  } else if (currentKey == "EngType") {
+    Serial.println("EngineType" + value);
+    aircrafts[index].enginetype = value;  
+    } else if (currentKey == "PosStale") {
     aircrafts[index].posStall = (value == "true");
   } else if (currentKey == "Cos") {
     int tempIndex = trailIndex / 4;
@@ -200,6 +222,8 @@ Aircraft AdsbExchangeClient::getAircraft(int i) {
   //return nullptr;
 }
 
+
+
 AircraftHistory AdsbExchangeClient::getAircraftHistory(int i) {
   return histories[i];
 }
@@ -208,7 +232,8 @@ int AdsbExchangeClient::getNumberOfAircrafts() {
   return counter;
 }
 
-Aircraft AdsbExchangeClient::getClosestAircraft(double lat, double lon) {
+
+Aircraft AdsbExchangeClient::getClosestAircraft(Coordinates coordinates) {
   double minDistance = 999999.0;
   Aircraft closestAircraft = aircrafts[0];
   for (int i = 0; i < getNumberOfAircrafts(); i++) {
@@ -222,9 +247,11 @@ Aircraft AdsbExchangeClient::getClosestAircraft(double lat, double lon) {
   return closestAircraft;
 }
 
+
+
 void AdsbExchangeClient::endArray() {
   if (counter >= MAX_AIRCRAFTS - 1) {
-    Serial.println("Max Aircrafts reached:end array");
+    Serial.println("MAx Aircrafts reached:end array");
     return;
   }
   if (currentKey == "Cos" && trailIndex > 0) {
@@ -240,7 +267,7 @@ void AdsbExchangeClient::endArray() {
       position.coordinates = coordinates;
       position.altitude = positionTemp[items - i - 1].altitude;
       history.positions[i] = position;
-      //Serial.println(String(i) + ": " + String(items - i -1) + ", " + String(history.positions[i].coordinates.lat, 9) + ", " + String(history.positions[i].coordinates.lon, 9));
+      Serial.println(String(i) + ": " + String(items - i -1) + ", " + String(history.positions[i].coordinates.lat, 9) + ", " + String(history.positions[i].coordinates.lon, 9));
       historyCounter++;
     }
     history.call = aircrafts[index].call;
