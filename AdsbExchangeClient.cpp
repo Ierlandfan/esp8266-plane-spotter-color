@@ -22,8 +22,10 @@ SOFTWARE.
 
 See more at http://blog.squix.ch
 */
-/* Edited by Bodmer */
+
+
 /* Modified bij Ierlandfan to incorporate more keys */
+
 #include "AdsbExchangeClient.h"
 
 
