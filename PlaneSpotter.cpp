@@ -388,37 +388,36 @@ int y2 = sin((-450 + (closestAircraft.heading + degrees[i+1])) * PI / 180) * pla
 
 
 
-//if (closestAircraft.Sqwak.toInt() == 7500 || 7700 )  
-//{
-//    tft_->fillRoundRect(190, 3, 80, 17, 2, TFT_BLACK);
-//    setTextColor(TFT_RED);
-//    drawString(193, 3, "EMERGENCY");
+if (closestAircraft.Sqwak == "7700")  
+{
+   tft_->fillRoundRect(190, 3, 80, 17, 2, TFT_BLACK);
+    setTextColor(TFT_RED);
+  drawString(193, 3, "EMERGENCY");
 
-//   tft_->fillRoundRect(3, 3, 90, 17, 2, TFT_BLACK);
-//    setTextColor(TFT_RED);
-//    drawString(6, 3, "Sqwak: ");
- //   setTextColor(TFT_RED);
- //   drawString(56, 3, String(closestAircraft.Sqwak));
-//}   
-  //  else if (closestAircraft.Sqwak.toInt() == 7000 ) 
-//{
-   // tft_->fillRoundRect(3, 3, 90, fontHeight, 2, TFT_BLACK);
-   // setTextColor(TFT_GREEN);
-   // drawString(6, 3, "Sqwak: ");
-   // setTextColor(TFT_GREEN);
-   // drawString(56, 3, String(closestAircraft.Sqwak));
- 
-  
-  //}
-
- //else if (closestAircraft.Sqwak != "") 
-//{
+   tft_->fillRoundRect(3, 3, 90, 17, 2, TFT_BLACK);
+    setTextColor(TFT_RED);
+    drawString(6, 3, "Sqwak: ");
+    setTextColor(TFT_RED);
+    drawString(56, 3, String(closestAircraft.Sqwak));
+}   
+ else if (closestAircraft.Sqwak == "7000" ) 
+{
+    tft_->fillRoundRect(3, 3, 90, fontHeight, 2, TFT_BLACK);
+    setTextColor(TFT_GREEN);
+    drawString(6, 3, "Sqwak: ");
+    setTextColor(TFT_GREEN);
+    drawString(56, 3, String(closestAircraft.Sqwak));
+    tft_->fillRoundRect(190, 3, 80, 17, 2, TFT_BLACK);    
+    drawString(193, 3, "VFR");
+  }
+else if (closestAircraft.Sqwak != "") 
+{
     tft_->fillRoundRect(3, 3, 90, fontHeight, 2, TFT_BLACK);
     setTextColor(TFT_GREEN);
     drawString(6, 3, "Sqwak: ");
     setTextColor(TFT_WHITE);
     drawString(56, 3, String(closestAircraft.Sqwak));
-//}
+}
   
   
 ///Type in text format -- custom for The Netherlands
@@ -544,18 +543,18 @@ if (closestAircraft.fromShort != "" && closestAircraft.toShort != "") {
 }
  
 void PlaneSpotter::drawSilhouettes(Aircraft  closestAircraft) {
+  if (closestAircraft.call != "") {          
 
   // Display the silhouettes //
   int linetype = geoMap_->getMapHeight() + 24;
   int leftTabtype = tft_->getWidth() /2 -42;
-    String silhouettettype = closestAircraft.Type;
-    String notimportant = "";  
-    String url = "http://192.168.1.100:8080:/silhouettes/A319.bmp";
-//   geoMap_->downloadsilhouette(url, silhouettettype); 
+    String silhouettettype = closestAircraft.Type + ".bmp";
+    String url = "http://192.168.1.100:8080:/silhouettes/" + silhouettettype;
+geoMap_->downloadsilhouette(url, silhouettettype); 
 
-   drawBmp("/" + silhouettettype + ".bmp", leftTabtype, linetype);      
+   drawBmp("/" + silhouettettype, leftTabtype, linetype);      
 }
-
+}
      
 void PlaneSpotter::drawMainMenu() {
   tft_->setTextFont(2);
@@ -565,7 +564,7 @@ void PlaneSpotter::drawMainMenu() {
   int numberOfCommands = 5;
   int fontHeight = 24;
   int buttonHeight = 40;
-  drawString(10, buttonHeight - fontHeight / 2, menutitle);  //Is this even working?
+  drawString(10, buttonHeight - fontHeight / 2, menutitle); 
      for (int i = 0; i < numberOfCommands; i++) {
       tft_->drawFastHLine(0, i * buttonHeight, tft_->getWidth(), TFT_WHITE);
     drawString(20, i * buttonHeight + (buttonHeight - fontHeight) / 2, commands[i]); 
