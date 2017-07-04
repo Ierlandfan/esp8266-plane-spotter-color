@@ -25,23 +25,15 @@ See more at https://blog.squix.org
 
 */
 
-#define minimum(a,b)     (((a) < (b)) ? (a) : (b))
-
 #pragma once
 
-// Call up the SPIFFS FLASH filing system this is part of the ESP Core
-#define FS_NO_GLOBALS
 #include <FS.h>
-
+#include <SPI.h>
 // JPEG decoder library
 #include <JPEGDecoder.h>
-
-// Call up the TFT library
-/* Added by Ierlandfan */ 
-#include <TFT_eSPI.h> // Hardware-specific library
 #include <XPT2046_Touchscreen.h>
-
 #include "AdsbExchangeClient.h"
+#include <TFT_eSPI.h>
 #include "GeoMap.h"
 
 #define TFT_BLACK   0x0000
@@ -52,6 +44,13 @@ See more at https://blog.squix.org
 #define TFT_MAGENTA 0xF81F
 #define TFT_YELLOW  0xFFE0  
 #define TFT_WHITE   0xFFFF
+#define TFT_BLUE_SKY 0xDF5F
+
+#define TS_MIN_X 220
+#define TS_MIN_Y 350
+#define TS_MAX_X 4000
+#define TS_MAX_Y 3500
+#define BUFFPIXEL 20
 
 enum TextAlignment {
   LEFT, CENTER, RIGHT
@@ -61,43 +60,37 @@ class PlaneSpotter {
   public:
     PlaneSpotter(TFT_eSPI* tft, GeoMap* geoMap);
     void copyProgmemToSpiffs(const uint8_t *data, unsigned int length, String filename);
-
     void drawSPIFFSJpeg(String filename, int xpos, int ypos);
     void renderJPEG(int xpos, int ypos);
-
+    void drawBmp(String filename, uint8_t x, uint16_t y);
     void drawPlane(Aircraft aircraft, boolean isSpecial);
-
-    String drawInfoBox(Aircraft closestAircraft);
+    void drawInfoBox(Aircraft closestAircraft);
 
     void drawAircraftHistory(Aircraft aircraft, AircraftHistory history);
-    void jpegInfo(void);
-
-/* added */
- void drawMainMenu();
- void PanAndZoom();
-   void drawString(int x, int y, char *text);
+    void drawSilhouettes(Aircraft  closestAircraft);
+     
+     void drawMainMenu();
+     void drawZoomAndPanMenu();
+     void drawPresetMenu();    
+    void drawString(int x, int y, char *text);
     
     void drawString(int x, int y, String text);
     
     void setTextAlignment(TextAlignment alignment);
-
-     void setTextColor(uint16_t c);
+    
+    void setTextColor(uint16_t c);
     
     void setTextColor(uint16_t c, uint16_t bg);
-    
-/* End Added */
+
     void setTouchScreen(XPT2046_Touchscreen* touchScreen);
 
     void setTouchScreenCalibration(uint16_t minX, uint16_t minY, uint16_t maxX, uint16_t maxY);
 
     CoordinatesPixel getTouchPoint();
- /* End */
- 
+
   private:
     TFT_eSPI* tft_;
-  /* added */
-    XPT2046_Touchscreen* touchScreen_; 
- /* End */
+    XPT2046_Touchscreen* touchScreen_;
     GeoMap* geoMap_;
     // Shape of the plane
     // The points are defined as degree on a circle, the first array are the degrees, 
@@ -111,9 +104,13 @@ class PlaneSpotter {
     TextAlignment alignment_ = LEFT;
     uint16_t textColor_;
     uint16_t backgroundColor_;
-
+    uint16_t minX_ = TS_MIN_X;
+    uint16_t minY_ = TS_MIN_Y;
+    uint16_t maxX_ = TS_MAX_X;
+    uint16_t maxY_ = TS_MAX_Y;
 
 
 
   
 };
+
