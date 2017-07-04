@@ -24,6 +24,10 @@ See more at http://blog.squix.ch
 */
 #include "GeoMap.h"
 
+
+
+
+
 GeoMap::GeoMap(MapProvider mapProvider, String apiKey, int mapWidth, int mapHeight) {
   mapProvider_ = mapProvider;
   apiKey_ = apiKey;
@@ -34,15 +38,16 @@ GeoMap::GeoMap(MapProvider mapProvider, String apiKey, int mapWidth, int mapHeig
 int GeoMap::getMapWidth() {
   return mapWidth_;
 }
-
 int GeoMap::getMapHeight() {
   return mapHeight_;
 }
+
 
 void GeoMap::downloadMap(Coordinates mapCenter, int zoom) {
   downloadMap(mapCenter, zoom, nullptr);
 }
 
+ 
 void GeoMap::downloadMap(Coordinates mapCenter, int zoom, ProgressCallback progressCallback) {
   mapCenter_= mapCenter;
   zoom_ = zoom;
@@ -55,12 +60,17 @@ void GeoMap::downloadMap(Coordinates mapCenter, int zoom, ProgressCallback progr
         downloadFile("http://maps.googleapis.com/maps/api/staticmap?key=" + apiKey_ + "&center="+ String(mapCenter_.lat) + "," + String(mapCenter_.lon)+"&zoom="+ String(zoom_)+"&size=" 
         + String(mapWidth_) + "x" + String(mapHeight_)+"&format=jpg-baseline&maptype=roadmap", getMapName(), progressCallback);
         break;
-  }
+
+ }
 
 }
 
 String GeoMap::getMapName() {
-  return "/map" + String(mapCenter_.lat) + "_" + String(mapCenter_.lon) + "_" + String(zoom_) + ".jpg";
+  return "map" + String(mapCenter_.lat) + "_" + String(mapCenter_.lon) + "_" + String(zoom_) + ".jpg";
+}
+
+int GeoMap::getCurrentZoomlevel() {
+  return int (zoom_);
 }
 
 CoordinatesPixel GeoMap::convertToPixel(Coordinates coordinates) {
@@ -113,14 +123,15 @@ void GeoMap::downloadFile(String url, String filename) {
   downloadFile(url, filename, nullptr);
 }
 
-void GeoMap::downloadFile(String url, String filename, ProgressCallback progressCallback) {
-    Serial.println("Downloading " + url + " and saving as " + filename);
 
-    if (SPIFFS.exists(filename) == true) {
-      Serial.println("File already exists. Skipping");
-      //return;
+void GeoMap::downloadsilhouette(String url, String filename) {
+    Serial.println("Downloading " + url + " and saving as " + filename);
+    if (SPIFFS.exists("/"+filename) == true) {
+      Serial.println("File already exists");
+      //return; 
     }
     // wait for WiFi connection
+    boolean isFirstCall = true;
     ESP8266WiFiMulti _wifiMulti;
     if((_wifiMulti.run() == WL_CONNECTED)) {
         HTTPClient http;
@@ -134,11 +145,11 @@ void GeoMap::downloadFile(String url, String filename, ProgressCallback progress
         // start connection and send HTTP header
         int httpCode = http.GET();
         if(httpCode > 0) {
-            //SPIFFS.remove(filename);
-            fs::File f = SPIFFS.open(filename, "w+");
+            SPIFFS.remove(filename);
+            File f = SPIFFS.open("/" +filename, "w+"); //was w+
             if (!f) {
                 Serial.println("file open failed");
-                return;
+                //return;
             }
             // HTTP header has been send and Server response header has been handled
             Serial.printf("[HTTP] GET... code: %d\n", httpCode);
@@ -148,10 +159,13 @@ void GeoMap::downloadFile(String url, String filename, ProgressCallback progress
 
                 // get lenght of document (is -1 when Server sends no Content-Length header)
                 int total = http.getSize();
+                 Serial.println(total);
                 int len = total;
-                progressCallback(filename, 0,total);
+                
+                
                 // create buffer for read
-                uint8_t buff[128] = { 0 };
+
+                uint8_t buff[600] = { 0 };
 
                 // get tcp stream
                 WiFiClient * stream = http.getStreamPtr();
@@ -161,31 +175,133 @@ void GeoMap::downloadFile(String url, String filename, ProgressCallback progress
                     // get available data size
                     size_t size = stream->available();
 
-                    if(size) {
+                     if(size) {
+                        
                         // read up to 128 byte
                         int c = stream->readBytes(buff, ((size > sizeof(buff)) ? sizeof(buff) : size));
+                        ESP.wdtFeed(); //added for no-resets
 
                         // write it to Serial
                         f.write(buff, c);
-
+                        Serial.println(" Works 1");
                         if(len > 0) {
                             len -= c;
+                       Serial.println("Works 2");
+
                         }
-                        progressCallback(filename, total - len,total);
+                         
+                    Serial.println("Fails here during runtime 3");
+
                     }
                     delay(1);
                 }
 
                 Serial.println();
                 Serial.print("[HTTP] connection closed or file end.\n");
-
+                 Serial.printf("4");
             }
             f.close();
+       
         } else {
-            Serial.printf("[HTTP] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());
+
+           Serial.printf("[HTTP] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());
         }
         
         http.end();
     }
 }
+
+
+
+
+
+void GeoMap::downloadFile(String url, String filename, ProgressCallback progressCallback) {
+    Serial.println("Downloading " + url + " and saving as " + filename);
+    if (SPIFFS.exists(filename) == true) {
+      Serial.println("File already exists");
+      //return; 
+    }
+    // wait for WiFi connection
+    boolean isFirstCall = true;
+    ESP8266WiFiMulti _wifiMulti;
+    if((_wifiMulti.run() == WL_CONNECTED)) {
+        HTTPClient http;
+
+        Serial.print("[HTTP] begin...\n");
+
+        // configure server and url
+        http.begin(url);
+
+        Serial.print("[HTTP] GET...\n");
+        // start connection and send HTTP header
+        int httpCode = http.GET();
+        if(httpCode > 0) {
+            SPIFFS.remove(filename);
+            File f = SPIFFS.open(filename, "w+"); //was w+
+            if (!f) {
+                Serial.println("file open failed");
+                //return;
+            }
+            // HTTP header has been send and Server response header has been handled
+            Serial.printf("[HTTP] GET... code: %d\n", httpCode);
+
+            // file found at server
+            if(httpCode == HTTP_CODE_OK) {
+
+                // get lenght of document (is -1 when Server sends no Content-Length header)
+                int total = http.getSize();
+                 Serial.println(total);
+                int len = total;
+                
+                //progressCallback(filename, 0,total, true);
+                // create buffer for read
+
+                uint8_t buff[600] = { 0 };
+
+                // get tcp stream
+                WiFiClient * stream = http.getStreamPtr();
+
+                // read all data from server
+                while(http.connected() && (len > 0 || len == -1)) {
+                    // get available data size
+                    size_t size = stream->available();
+
+                     if(size) {
+                        
+                        // read up to 128 byte
+                        int c = stream->readBytes(buff, ((size > sizeof(buff)) ? sizeof(buff) : size));
+                        ESP.wdtFeed(); //added for no-resets
+
+                        // write it to Serial
+                        f.write(buff, c);
+                     
+                        if(len > 0) {
+                            len -= c;
+                     
+
+                        }
+                         
+                       progressCallback(filename, total - len,total, false);
+                       isFirstCall = false;
+                 
+
+                    }
+                    delay(1);
+                }
+
+                Serial.println();
+                Serial.print("[HTTP] connection closed or file end.\n");
+                 Serial.printf("4");
+            }
+            f.close();
+       
+        } else {
+
+           Serial.printf("[HTTP] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());
+        }
+        
+        http.end();
+    }
+}
+
 
