@@ -255,8 +255,9 @@ void PlaneSpotter::drawPlane(Aircraft aircraft, boolean isSpecial) {
   CoordinatesPixel p = geoMap_->convertToPixel(coordinates);
   
   setTextColor(TFT_WHITE, TFT_BLACK);
-  setTextAlignment(LEFT);
-  drawString(p.x + 8,p.y - 5, aircraft.call);
+  setTextAlignment(CENTER);
+  //drawString(p.x + 8,p.y - 5, aircraft.call);
+  drawString(p.x, p.y, aircraft.call);
   
   // This draws the red Triangle
   int planeDotsX[planeDots_];
@@ -361,7 +362,7 @@ int x1 = cos((-450 + (closestAircraft.heading + degrees[i])) * PI / 180) * plane
 int y1 = sin((-450 + (closestAircraft.heading + degrees[i])) * PI / 180) * planeRadius_[i] + geoMap_->getMapHeight() + 29; //was 29
 int x2 = cos((-450 + (closestAircraft.heading + degrees[i+1])) * PI / 180) * planeRadius_[i] + leftTab4 +60; 
 int y2 = sin((-450 + (closestAircraft.heading + degrees[i+1])) * PI / 180) * planeRadius_[i] + geoMap_->getMapHeight() + 29; 
-     //tft_->drawLine(x1, y1, x2, y2, TFT_RED);
+     tft_->drawLine(x1, y1, x2, y2, TFT_RED);
 }
   //End Heading as compass draw
 
@@ -550,7 +551,9 @@ void PlaneSpotter::drawSilhouettes(Aircraft  closestAircraft) {
     String silhouettettype = "A319.bmp";
     String notimportant = "";  
     String url = "http://192.168.1.100:8080:/silhouettes/A319.bmp";
- //   geoMap_->downloadsilhouette(url, silhouettettype); 
+  // geoMap_->downloadsilhouette(url, silhouettettype);  //Hashed out for now, it crashes the ESP fr some unknown reason
+  delay(2000);
+  yield();
    drawBmp(silhouettettype, leftTabtype, linetype);      
 }
 
