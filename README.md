@@ -2,21 +2,25 @@
 
 Adapted by me to make use of the new Graphics library because I had a ILI9486 with touch originally designed for a Raspberry Pi.
 It's a 3.5 Inch TFT aka Waveshare clone. 
-It's a mix between the lastest Planespotter and Bodmer's work.
+It's a mix between the lastest Planespotter by Daniel and Bodmer's work.
+
 (Forum: https://forum.arduino.cc/index.php?topic=443787.120) and made it suit 480*320. 
 
+You need the JpegDecoder from Frederique Plant ( https://github.com/fredericplante/JPEG_CODEC ) otherwise the map is not shown.
+Have to ask Bodmer how to fix that so we can make use of his version. 
 
 I added a few functions to Bodmer's incredible TFT_eSPI library and included them for reference. 
 I didn't fork that one since originally I just wanted to make the new Planespotter work and there are (already) built-in solutions but that would take me more time to figure those out so I decided to simpy add the missing functions from AdafruitGFX.    
-  
+Have to ask Bodmer how to fix thatso we can make use of a unmodified version, but for now it's a dev version so...
+
 Changed the complete interface.
 
 Thanx to Bodmer for whipping up a working touchsketch. I incorporated that code in the current version and also included the original sketch as seperate sketch. You need https://github.com/PaulStoffregen/XPT2046_Touchscreen for it to work.
 The Dev branch has code for touch but that's a WIP. It's hashed out at the moment even though parts are working. (Zoom is working)   
 
 The idea behind the menustructure is (shortpress) 0 is ZoomAndPan, (Longer press) 1 MainMenu, (Even longer press) 2 manual update 
-The menu's are defined in planespotter.cpp
-The drawing of menu's is working.
+The menu's are defined in planespotter.cpp. The commands are working (but hashed out) because there are to much if's and I hate brackets and IF's so maybe I will use JOS for the menu and touch structure.
+
 
 
 
