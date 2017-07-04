@@ -255,9 +255,9 @@ void PlaneSpotter::drawPlane(Aircraft aircraft, boolean isSpecial) {
   CoordinatesPixel p = geoMap_->convertToPixel(coordinates);
   
   setTextColor(TFT_WHITE, TFT_BLACK);
-  setTextAlignment(CENTER);
-  //drawString(p.x + 8,p.y - 5, aircraft.call);
-  drawString(p.x, p.y, aircraft.call);
+  setTextAlignment(LEFT);
+  drawString(p.x + 8,p.y - 5, aircraft.call);
+  //drawString(p.x, p.y, aircraft.call);
   
   // This draws the red Triangle
   int planeDotsX[planeDots_];
@@ -458,7 +458,7 @@ chassiscolor = TFT_LIGHTGREY;
 if(enginetype == "1")
 {
 //Draw GA like plane 
-chassiscolor = TFT_RED;
+chassiscolor = TFT_BLUE_SKY;
 chassis = "GA";
 }
 
@@ -494,7 +494,7 @@ chassis = "Land Plane";
       }
          break;
       case 4: {
-        chassiscolor = TFT_NAVY;
+        chassiscolor = TFT_BLUE_SKY;
         chassis = "Helicopter";
       }
          break;
@@ -548,13 +548,12 @@ void PlaneSpotter::drawSilhouettes(Aircraft  closestAircraft) {
   // Display the silhouettes //
   int linetype = geoMap_->getMapHeight() + 24;
   int leftTabtype = tft_->getWidth() /2 -42;
-    String silhouettettype = "A319.bmp";
+    String silhouettettype = closestAircraft.Type;
     String notimportant = "";  
     String url = "http://192.168.1.100:8080:/silhouettes/A319.bmp";
-  // geoMap_->downloadsilhouette(url, silhouettettype);  //Hashed out for now, it crashes the ESP fr some unknown reason
-  delay(2000);
-  yield();
-   drawBmp(silhouettettype, leftTabtype, linetype);      
+//   geoMap_->downloadsilhouette(url, silhouettettype); 
+
+   drawBmp("/" + silhouettettype + ".bmp", leftTabtype, linetype);      
 }
 
      
